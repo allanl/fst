@@ -34,7 +34,7 @@ import org.xml.sax.SAXException;
 public class FST extends JFrame implements Runnable {
 	private static boolean configChanged = false;
 	static boolean canSave = false;
-	final static String VERSION = "V1.49b";
+	final static String VERSION = "V1.51";
 	final static int RANDOM = 0;
 	final static int LEFT = 1;
 	final static int CENTER = 2;

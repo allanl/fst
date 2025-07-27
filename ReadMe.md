@@ -17,10 +17,10 @@ Free Subliminal Text (FST), flashes subliminal messages on screen. The default s
 * Text Control - Have each message's words or letters reversed or randomized.
 * Placement Control - Left-Top to Right-Bottom, plus random and margin options.
 * Message Control - Drag and drop suggestions are available, but any message inside Your Messages can be edited.
-* Multiplatform - Windows at work, Mac and/or Linux (think Asus EEE) at home? No problem. FST runs on any platform Java (JRE 1.6+) does.
+* Multiplatform - Windows at work, Mac and/or Linux (think Asus EEE) at home? No problem. FST runs on any platform Java (JRE 1.8+) does.
 
 ## Requirements
-* Java 1.6+ must be installed.
+* Java 1.8+ must be installed.
 
 ## Setup
 The application FST.jar can be put anywhere. Bear in mind that it will try to create a config file called FSTConfig.xml in the same location.
@@ -50,6 +50,9 @@ If FST.jar opens in archive manager instead of executing, right-click and select
 * Add additional built-in messages - Suggestions anyone?
 
 ## Release History
+### 1.51 - 2025-07-27
+* Updated to require Java 1.8.
+
 ### 1.50 - 2014-03-01
 * Switched to native transparency.
 * Now requires Java 1.6.
