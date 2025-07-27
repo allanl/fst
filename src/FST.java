@@ -3,11 +3,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
-//import java.awt.Robot;
 import java.awt.Toolkit;
-//import java.awt.event.InputEvent;
-//import java.awt.event.MouseAdapter;
-//import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -62,8 +58,6 @@ public class FST extends JFrame implements Runnable {
 	static int configWindow = 1;
 	static long nextUpdate = System.currentTimeMillis()/1000L+30L*86400L;
 	static boolean checkUpdates = true;
-        //static int mouseR = 0, mouseP = 0; // For mouse click throughs
-	//private Image background = null;
         private String text;
         private FontMetrics fontMetrics;
         
@@ -81,7 +75,6 @@ public class FST extends JFrame implements Runnable {
 		if (configWindow>0) {
 			config = new Config();
 		}
-		//settingsChanged = false;
 		new FST();
 	}
         
@@ -317,28 +310,12 @@ public class FST extends JFrame implements Runnable {
 		setUndecorated(true);
                 setFocusable(false);
                 
-                /*MouseAdapter m = new MouseAdapter() {
-                    @Override
-                    public void mousePressed(MouseEvent e) {
-                        mouseP = InputEvent.getMaskForButton(e.getButton());//e.getButton();
-                        System.out.println(InputEvent.BUTTON1_MASK);
-                      
-                    }
-                    @Override
-                    public void mouseReleased(MouseEvent e) {
-                        mouseR = InputEvent.getMaskForButton(e.getButton());
-                        System.out.println(InputEvent.BUTTON1_MASK);
-                    }
-                };
-                this.addMouseListener(m);*/
 		new Thread(this).start();
 	}
 
 	@Override
 	public void paint(Graphics g) {
             g.clearRect(0, 0, this.getWidth(), this.getHeight());
-            //g.setColor(new Color(0, 0, 0, 0f));
-            //g.fillRect(0, 0, this.getWidth(), this.getHeight());
             
             g.setFont(font);
             g.setColor(fontColour);
@@ -364,9 +341,7 @@ public class FST extends JFrame implements Runnable {
 	public void run() {
 		try {
 			Toolkit toolkit = Toolkit.getDefaultToolkit();
-			//Robot rbt = new Robot();
 			Font tempFont = null;
-			//FontMetrics fontMetrics = null;
 			int height = 0;
 			int messagePosition = -1;
                         Dimension screen = null;
@@ -374,13 +349,7 @@ public class FST extends JFrame implements Runnable {
                         setVisible(true);
                         Graphics g = getGraphics();
                         setVisible(false);
-                        //Long d = new Date().getTime();
 			for (;;) {
-                                /*Long now = new Date().getTime();
-                                if (now > d + 60 * 1000) {
-                                    System.gc();
-                                    d = now;
-                                }*/
                                 boolean change = false;
 				if (font != tempFont) {
 					fontMetrics = g.getFontMetrics(font);
@@ -407,29 +376,12 @@ public class FST extends JFrame implements Runnable {
 					x = getPosition(screen.width, width, placementX, marginX);
 					int y = getPosition(screen.height, height, placementY, marginY);
                                         setLocation(0, y);
-                                        //setBounds(x, y, width*12/10, height); // 20% larger for macs (some strange fontMetrics)
-                                        //setBackground(new Color(0f, 0f, 0f, 0f));
-                                        //repaint();
-                                        //this.paint
                                         
 					setVisible(true);
 					Thread.sleep(display);
 					setVisible(false);
-                                     /*   if(mouseP != 0 || mouseR != 0) {
-                                            //System.out.println(mouseP+" "+mouseR);
-                                            Robot r = new Robot();
-                                            //r.mou
-                                            if(mouseP != 0) r.mousePress(mouseP);
-                                            if(mouseR != 0) r.mouseRelease(mouseR);
-                                            mouseP = 0;
-                                            mouseR = 0;
-                                        }*/
-                                        //System.gc();
 				}
 				Thread.sleep(delay);
-				/*if (background != null) {
-					background.flush();
-				}*/
 			}
 		} catch (Exception ex) {
 			JOptionPane.showMessageDialog(null, ex);

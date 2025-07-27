@@ -12,7 +12,6 @@ import javax.swing.text.JTextComponent;
  * @author  krolaw
  */
 public class OptionsConfigPanel extends javax.swing.JPanel {
-	//private JPanel samplePanel;
 	private final static String SAMPLE_TEXT = "FST Sample Text";
 	public static String sampleText;
 	
@@ -47,7 +46,6 @@ public class OptionsConfigPanel extends javax.swing.JPanel {
 		Color o = FST.fontColour;
 		Color c = new Color(o.getRed(), o.getGreen(), o.getBlue());
 		colorButton.setBackground(c);
-		//colorButton.setForeground(c);
 		familyCombo.setSelectedItem(FST.font.getFamily());
 		sizeField.setText(Integer.toString(FST.font.getSize()));
 		alphaSlider.setValue(FST.fontColour.getAlpha());
@@ -575,7 +573,6 @@ public class OptionsConfigPanel extends javax.swing.JPanel {
 		if (c != null) {
 			FST.fontColour = new Color(c.getRed(), c.getGreen(), c.getBlue(), o.getAlpha());
 			colorButton.setBackground(c);
-			//colorButton.setForeground(c);
 			samplePanel1.repaint();
 			FST.settingsChanged();
 		}

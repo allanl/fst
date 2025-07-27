@@ -201,9 +201,7 @@ public class MessageConfigPanel extends javax.swing.JPanel {
 		} catch (IOException ex) {}//GEN-LAST:event_messagesTextFocusLost
 finally {
 			messagesText.setText(sb.toString());
-			//FST.save();
                         FST.settingsChanged();
-			//FST.settingsChanged = true;
 		}
 	}     
 
