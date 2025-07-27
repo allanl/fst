@@ -1,6 +1,8 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Scanner;
 import javax.swing.JOptionPane;
@@ -102,7 +104,7 @@ public class Config extends javax.swing.JFrame implements Runnable {
         @Override
 	public void run() {
 		try {
-			URL url = new URL("http://richard.warburton.it/fst/version.php");
+			URL url = new URI("http://richard.warburton.it/fst/version.php").toURL();
 			BufferedReader br = new BufferedReader(new InputStreamReader(url.openConnection().getInputStream()));
 			String currentVersion = br.readLine();
 			if(FST.VERSION.compareTo(currentVersion) < 0) {
@@ -112,7 +114,7 @@ public class Config extends javax.swing.JFrame implements Runnable {
 			}
 			FST.nextUpdate = System.currentTimeMillis()/1000L+30L*86400L;
 			FST.save();
-		} catch (IOException ex) {
+		} catch (IOException | URISyntaxException ex) {
 			System.out.println("Error: "+ex);
 		}
 	}

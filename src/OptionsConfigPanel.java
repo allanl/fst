@@ -43,7 +43,7 @@ public class OptionsConfigPanel extends javax.swing.JPanel {
 		
 		sizeField.addKeyListener(digitsOnly);
 		GraphicsEnvironment gEnv = GraphicsEnvironment.getLocalGraphicsEnvironment();
-		familyCombo.setModel(new DefaultComboBoxModel(gEnv.getAvailableFontFamilyNames()));
+		familyCombo.setModel(new DefaultComboBoxModel<>(gEnv.getAvailableFontFamilyNames()));
 		Color o = FST.fontColour;
 		Color c = new Color(o.getRed(), o.getGreen(), o.getBlue());
 		colorButton.setBackground(c);
@@ -81,16 +81,16 @@ public class OptionsConfigPanel extends javax.swing.JPanel {
 
     jPanel2 = new javax.swing.JPanel();
     familyLabel = new javax.swing.JLabel();
-    familyCombo = new javax.swing.JComboBox();
+    familyCombo = new javax.swing.JComboBox<>();
     sizeLabel = new javax.swing.JLabel();
     colorLabel = new javax.swing.JLabel();
     colorButton = new javax.swing.JButton();
     alphaLabel = new javax.swing.JLabel();
     alphaSlider = new javax.swing.JSlider();
     jLabel1 = new javax.swing.JLabel();
-    wordOrderCombo = new javax.swing.JComboBox();
+    wordOrderCombo = new javax.swing.JComboBox<>();
     jLabel2 = new javax.swing.JLabel();
-    letterOrderCombo = new javax.swing.JComboBox();
+    letterOrderCombo = new javax.swing.JComboBox<>();
     FontLabel = new javax.swing.JLabel();
     OrderLabel = new javax.swing.JLabel();
     DisplayLabel = new javax.swing.JLabel();
@@ -101,7 +101,7 @@ public class OptionsConfigPanel extends javax.swing.JPanel {
     jLabel3 = new javax.swing.JLabel();
     jLabel4 = new javax.swing.JLabel();
     jLabel5 = new javax.swing.JLabel();
-    styleCombo = new javax.swing.JComboBox();
+    styleCombo = new javax.swing.JComboBox<>();
     jLabel6 = new javax.swing.JLabel();
     jLabel7 = new javax.swing.JLabel();
     jLabel8 = new javax.swing.JLabel();
@@ -119,8 +119,8 @@ public class OptionsConfigPanel extends javax.swing.JPanel {
     jPanel6 = new javax.swing.JPanel();
     delayField = new javax.swing.JTextField();
     jLabel15 = new javax.swing.JLabel();
-    placementX = new javax.swing.JComboBox();
-    placementY = new javax.swing.JComboBox();
+    placementX = new javax.swing.JComboBox<>();
+    placementY = new javax.swing.JComboBox<>();
     jLabel16 = new javax.swing.JLabel();
     jPanel7 = new javax.swing.JPanel();
     minimizeCheckBox = new javax.swing.JCheckBox();
@@ -228,7 +228,7 @@ public class OptionsConfigPanel extends javax.swing.JPanel {
     jPanel2.add(jLabel1, gridBagConstraints);
 
     wordOrderCombo.setFont(new java.awt.Font("SansSerif", 0, 13));
-    wordOrderCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Forward", "Reverse", "Rnd Inner", "Random", "Join" }));
+    wordOrderCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Forward", "Reverse", "Rnd Inner", "Random", "Join" }));
     wordOrderCombo.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         wordOrderComboActionPerformed(evt);
@@ -249,7 +249,7 @@ public class OptionsConfigPanel extends javax.swing.JPanel {
     jPanel2.add(jLabel2, gridBagConstraints);
 
     letterOrderCombo.setFont(new java.awt.Font("SansSerif", 0, 13));
-    letterOrderCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Forward", "Reverse", "Rnd Inner", "Random" }));
+    letterOrderCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Forward", "Reverse", "Rnd Inner", "Random" }));
     letterOrderCombo.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         letterOrderComboActionPerformed(evt);
@@ -342,7 +342,7 @@ public class OptionsConfigPanel extends javax.swing.JPanel {
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
     jPanel2.add(jLabel5, gridBagConstraints);
 
-    styleCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Plain", "Bold", "Italic", "BoldItalic" }));
+    styleCombo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Plain", "Bold", "Italic", "BoldItalic" }));
     styleCombo.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         fontListener(evt);
@@ -503,7 +503,7 @@ public class OptionsConfigPanel extends javax.swing.JPanel {
     jPanel2.add(jPanel6, gridBagConstraints);
 
     placementX.setFont(new java.awt.Font("SansSerif", 0, 13));
-    placementX.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Random", "Left", "Center", "Right" }));
+    placementX.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Random", "Left", "Center", "Right" }));
     placementX.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         placementXActionPerformed(evt);
@@ -516,7 +516,7 @@ public class OptionsConfigPanel extends javax.swing.JPanel {
     jPanel2.add(placementX, gridBagConstraints);
 
     placementY.setFont(new java.awt.Font("SansSerif", 0, 13));
-    placementY.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Random", "Top", "Center", "Bottom" }));
+    placementY.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Random", "Top", "Center", "Bottom" }));
     placementY.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         placementYActionPerformed(evt);
@@ -680,7 +680,7 @@ public class OptionsConfigPanel extends javax.swing.JPanel {
   private javax.swing.JLabel colorLabel;
   private javax.swing.JTextField delayField;
   private javax.swing.JTextField displayField;
-  private javax.swing.JComboBox familyCombo;
+  private javax.swing.JComboBox<String> familyCombo;
   private javax.swing.JLabel familyLabel;
   private javax.swing.JLabel jLabel1;
   private javax.swing.JLabel jLabel10;
@@ -705,16 +705,16 @@ public class OptionsConfigPanel extends javax.swing.JPanel {
   private javax.swing.JPanel jPanel5;
   private javax.swing.JPanel jPanel6;
   private javax.swing.JPanel jPanel7;
-  private javax.swing.JComboBox letterOrderCombo;
+  private javax.swing.JComboBox<String> letterOrderCombo;
   private javax.swing.JCheckBox minimizeCheckBox;
-  private javax.swing.JComboBox placementX;
-  private javax.swing.JComboBox placementY;
+  private javax.swing.JComboBox<String> placementX;
+  private javax.swing.JComboBox<String> placementY;
   private SamplePanel samplePanel1;
   private javax.swing.JTextField sizeField;
   private javax.swing.JLabel sizeLabel;
-  private javax.swing.JComboBox styleCombo;
+  private javax.swing.JComboBox<String> styleCombo;
   private javax.swing.JCheckBox updatesCheckBox;
-  private javax.swing.JComboBox wordOrderCombo;
+  private javax.swing.JComboBox<String> wordOrderCombo;
   private javax.swing.JTextField xMarginField;
   private javax.swing.JTextField yMarginField;
   // End of variables declaration//GEN-END:variables

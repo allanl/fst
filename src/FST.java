@@ -50,7 +50,7 @@ public class FST extends JFrame implements Runnable {
 	final static String[] V_ALIGN_STRINGS = {"random", "top", "center", "bottom"};
 	final static String[] CONFIG_WINDOW_STRINGS = { "false","true","minimized" };
 	final static String[] MESSAGE_ORDER_STRINGS = { "random", "sequential"};
-	static List<String> messages = new ArrayList<String>();
+	static List<String> messages = new ArrayList<>();
 	static Font font = new Font("sans-serif", Font.PLAIN, 35);
 	static Color fontColour = new Color(0, 0, 255, 30);
 	static int display = 100, delay = 300;
@@ -121,7 +121,7 @@ public class FST extends JFrame implements Runnable {
 		}
 		List<String> words;
 		if (wordOrder == JOIN) {
-			words = new ArrayList<String>(1);
+			words = new ArrayList<>(1);
 			words.add(msg);
 		} else {
 			words = Arrays.asList(msg.split(" "));
@@ -130,7 +130,7 @@ public class FST extends JFrame implements Runnable {
 		if (letterOrder != FORWARD) {
 			for (int x = 0; x < words.size(); x++) {
 				char[] l = words.get(x).toCharArray();
-				List<Character> letters = new ArrayList<Character>(l.length);
+				List<Character> letters = new ArrayList<>(l.length);
 				for (Character c : l) {
 					letters.add(c);
 				}
@@ -225,7 +225,7 @@ public class FST extends JFrame implements Runnable {
 			Document doc = db.parse(configFile);
 			try { // Check Data
 				NodeList nl = doc.getElementsByTagName("message");
-				messages = new ArrayList<String>(nl.getLength());
+				messages = new ArrayList<>(nl.getLength());
 				for (int x = 0; x < nl.getLength(); x++) {
 					messages.add(nl.item(x).getTextContent());
 				}

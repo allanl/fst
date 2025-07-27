@@ -74,13 +74,13 @@ public class MessageConfigPanel extends javax.swing.JPanel {
 
 		});
 
-		suggestions = new HashMap<String, List<String>>();
+		suggestions = new HashMap<>();
 		try {
 			Document suggestionXML = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(this.getClass().getResource("Suggestions.xml").openStream());
 			NodeList suggestionGroups = suggestionXML.getElementsByTagName("group");
 			for (int x = 0; x < suggestionGroups.getLength(); x++) {
 				Element groupXML = (Element) suggestionGroups.item(x);
-				List<String> opt = new ArrayList<String>();
+				List<String> opt = new ArrayList<>();
 				suggestions.put(groupXML.getAttribute("title"), opt);
 				NodeList optItems = groupXML.getElementsByTagName("opt");
 				for (int y = 0; y < optItems.getLength(); y++) {
@@ -88,10 +88,10 @@ public class MessageConfigPanel extends javax.swing.JPanel {
 				}
 				Collections.sort(opt);
 			}
-			List<String> groups = new ArrayList<String>(suggestions.keySet());
+			List<String> groups = new ArrayList<>(suggestions.keySet());
 			Collections.sort(groups);
-			suggestionsCombo.setModel(new DefaultComboBoxModel(groups.toArray()));
-			suggestionsList.setModel(new DefaultComboBoxModel(suggestions.get(groups.get(0)).toArray()));
+			suggestionsCombo.setModel(new DefaultComboBoxModel<>(groups.toArray(new String[0])));
+			suggestionsList.setModel(new DefaultComboBoxModel<>(suggestions.get(groups.get(0)).toArray(new String[0])));
 		} catch (IOException ex) {
 		} catch (SAXException ex) {
 		} catch (ParserConfigurationException ex) {
@@ -103,16 +103,16 @@ public class MessageConfigPanel extends javax.swing.JPanel {
 
         jPanel2 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        suggestionsList = new javax.swing.JList();
+        suggestionsList = new javax.swing.JList<>();
         jPanel3 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
-        suggestionsCombo = new javax.swing.JComboBox();
+        suggestionsCombo = new javax.swing.JComboBox<>();
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         messagesText = new javax.swing.JTextArea();
         jPanel4 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        messageOrderBox = new javax.swing.JComboBox();
+        messageOrderBox = new javax.swing.JComboBox<>();
 
         setLayout(new java.awt.BorderLayout());
 
@@ -171,7 +171,7 @@ public class MessageConfigPanel extends javax.swing.JPanel {
         jLabel1.setPreferredSize(new java.awt.Dimension(120, 20));
         jPanel4.add(jLabel1);
 
-        messageOrderBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Display Random", "Display Sequential" }));
+        messageOrderBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Display Random", "Display Sequential" }));
         messageOrderBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 messageOrderBoxActionPerformed(evt);
@@ -208,7 +208,7 @@ finally {
 	}     
 
 	private void suggestionsComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_suggestionsComboActionPerformed
-		suggestionsList.setModel(new DefaultComboBoxModel(suggestions.get(suggestionsCombo.getSelectedItem()).toArray()));
+		suggestionsList.setModel(new DefaultComboBoxModel<>(suggestions.get(suggestionsCombo.getSelectedItem()).toArray(new String[0])));
 	}//GEN-LAST:event_suggestionsComboActionPerformed
 
 	private void messageOrderBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_messageOrderBoxActionPerformed
@@ -229,9 +229,9 @@ finally {
     private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JComboBox messageOrderBox;
+    private javax.swing.JComboBox<String> messageOrderBox;
     private javax.swing.JTextArea messagesText;
-    private javax.swing.JComboBox suggestionsCombo;
-    private javax.swing.JList suggestionsList;
+    private javax.swing.JComboBox<String> suggestionsCombo;
+    private javax.swing.JList<String> suggestionsList;
     // End of variables declaration//GEN-END:variables
 }
