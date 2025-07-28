@@ -4,6 +4,8 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.Timer;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -27,9 +30,11 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-public class FST extends JFrame implements Runnable {
+public class FST extends JFrame {
 	private static boolean configChanged = false;
 	static boolean canSave = false;
+	private static Timer displayTimer;
+	private static Timer delayTimer;
 	final static String VERSION = "V1.51";
 	final static int RANDOM = 0;
 	final static int LEFT = 1;
@@ -60,6 +65,11 @@ public class FST extends JFrame implements Runnable {
 	static boolean checkUpdates = true;
         private String text;
         private FontMetrics fontMetrics;
+        private Toolkit toolkit;
+        private Font tempFont = null;
+        private int height = 0;
+        private int messagePosition = -1;
+        private Dimension screen = null;
         
         private int ascent = 0;
         private int x = 0;
@@ -80,6 +90,16 @@ public class FST extends JFrame implements Runnable {
         
         public static void settingsChanged() {
             configChanged = true;
+            updateTimerDurations();
+        }
+
+        public static void updateTimerDurations() {
+            if (displayTimer != null) {
+                displayTimer.setInitialDelay(display);
+            }
+            if (delayTimer != null) {
+                delayTimer.setInitialDelay(delay);
+            }
         }
 	
 	protected static void minimise() {
@@ -310,7 +330,36 @@ public class FST extends JFrame implements Runnable {
 		setUndecorated(true);
                 setFocusable(false);
                 
-		new Thread(this).start();
+                toolkit = Toolkit.getDefaultToolkit();
+                setBackground(new Color(0f, 0f, 0f, 0f));
+
+                // Initialize timers
+                displayTimer = new Timer(display, e -> {
+                    setVisible(false);
+                    delayTimer.restart();
+                });
+                displayTimer.setRepeats(false);
+
+                delayTimer = new Timer(delay, e -> {
+                    prepareNextMessage();
+                });
+                delayTimer.setRepeats(false);
+
+                // Initialize variables
+                setVisible(true);
+                Graphics g = getGraphics();
+                setVisible(false);
+
+                if (g != null) {
+                    fontMetrics = g.getFontMetrics(font);
+                    height = fontMetrics.getHeight();
+                    ascent = fontMetrics.getAscent();
+                    tempFont = font;
+                    screen = toolkit.getScreenSize();
+                    setBounds(0, 0, screen.width, height);
+                }
+
+                prepareNextMessage();
 	}
 
 	@Override
@@ -336,56 +385,46 @@ public class FST extends JFrame implements Runnable {
 			return mode;
 		}
 	}
-
-        @Override
-	public void run() {
+        
+        private void prepareNextMessage() {
 		try {
-			Toolkit toolkit = Toolkit.getDefaultToolkit();
-			Font tempFont = null;
-			int height = 0;
-			int messagePosition = -1;
-                        Dimension screen = null;
-                        setBackground(new Color(0f, 0f, 0f, 0f));
-                        setVisible(true);
-                        Graphics g = getGraphics();
-                        setVisible(false);
-			for (;;) {
-                                boolean change = false;
-				if (font != tempFont) {
+			boolean change = false;
+			if (font != tempFont) {
+				Graphics g = getGraphics();
+				if (g != null) {
 					fontMetrics = g.getFontMetrics(font);
 					height = fontMetrics.getHeight();
-                                        ascent = fontMetrics.getAscent();
-                                        change = true;
+					ascent = fontMetrics.getAscent();
+					change = true;
 					tempFont = font;
 				}
-				Dimension scr = toolkit.getScreenSize();
-                                if(!scr.equals(screen)) {
-                                    change = true;
-                                    screen = scr;
-                                   
-                                }
-                                if(change) {
-                                    setBounds(0,0,screen.width, height);
-                                     System.out.print(scr.width);
-                                }
-                                
-				if(messages.size() > 0) {
-					text = orderMessage(messages.get(messageOrder == RANDOM ? (int) (Math.random() * messages.size()):
-						(messagePosition = (messagePosition+1)%messages.size())));
-					int width = fontMetrics.stringWidth(text);
-					x = getPosition(screen.width, width, placementX, marginX);
-					int y = getPosition(screen.height, height, placementY, marginY);
-                                        setLocation(0, y);
-                                        
-					setVisible(true);
-					Thread.sleep(display);
-					setVisible(false);
-				}
-				Thread.sleep(delay);
+			}
+			Dimension scr = toolkit.getScreenSize();
+			if (screen == null || !scr.equals(screen)) {
+				change = true;
+				screen = scr;
+			}
+			if (change) {
+				setBounds(0, 0, screen.width, height);
+			}
+
+			if (messages.size() > 0) {
+				text = orderMessage(messages.get(messageOrder == RANDOM ? (int) (Math.random() * messages.size()):
+					(messagePosition = (messagePosition+1)%messages.size())));
+				int width = fontMetrics.stringWidth(text);
+				x = getPosition(screen.width, width, placementX, marginX);
+				int y = getPosition(screen.height, height, placementY, marginY);
+				setLocation(0, y);
+
+				setVisible(true);
+				displayTimer.restart();
+			} else {
+				// No messages, just wait and check again
+				delayTimer.restart();
 			}
 		} catch (Exception ex) {
 			JOptionPane.showMessageDialog(null, ex);
-                        save();
+			save();
 			System.exit(1);
 		}
 	}
