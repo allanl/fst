@@ -1,0 +1,20 @@
+# Build artifacts
+build/
+dist/
+reports/
+
+# Downloaded dependencies and tools
+lib/
+ivy/
+jacoco/
+
+# System and IDE files
+.DS_Store
+*.iml
+nbproject/private/
+
+# Temporary files
+*.swp
+*~
+.#*
+
