@@ -7,14 +7,297 @@
 <!-- the Compile on Save feature is turned off for the project. -->
 <!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
 <!-- in the project's Project Properties dialog box.-->
-<project name="FST" default="default" basedir=".">
+<project name="FST" default="default" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant" xmlns:jacoco="antlib:org.jacoco.ant">
     <description>Builds, tests, and runs the project FST.</description>
+
+    <!-- Ivy properties -->
+    <property name="ivy.install.version" value="2.5.1" />
+    <property name="ivy.jar.dir" value="${basedir}/ivy" />
+    <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar" />
+    <property name="ivy.reports.dir" value="${basedir}/reports/ivy" />
+
+    <!-- JaCoCo properties -->
+    <property name="jacoco.report.dir" value="${basedir}/reports/coverage" />
+
+    <!-- Import NetBeans build file -->
     <import file="nbproject/build-impl.xml"/>
+
+    <!-- =================================
+          Ivy setup targets
+         ================================= -->
+    <target name="download-ivy" unless="ivy.available">
+        <mkdir dir="${ivy.jar.dir}"/>
+        <echo message="Downloading Ivy..."/>
+        <get src="https://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"
+             dest="${ivy.jar.file}" usetimestamp="true"/>
+    </target>
+
+    <target name="check-ivy">
+        <available file="${ivy.jar.file}" property="ivy.available"/>
+    </target>
+
+    <target name="init-ivy" depends="check-ivy, download-ivy">
+        <path id="ivy.lib.path">
+            <fileset dir="${ivy.jar.dir}" includes="*.jar"/>
+        </path>
+        <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
+    </target>
+
+    <!-- =================================
+          JaCoCo setup targets
+         ================================= -->
+    <target name="init-jacoco" depends="resolve">
+        <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+            <classpath refid="ivy.test.classpath"/>
+        </taskdef>
+    </target>
+
+    <!-- =================================
+          Dependency management targets
+         ================================= -->
+    <target name="resolve" depends="init-ivy" description="Retrieve dependencies with Ivy">
+        <echo message="=== Starting Ivy resolution ==="/>
+        <ivy:retrieve pattern="${basedir}/lib/[conf]/[artifact]-[revision](-[classifier]).[ext]" sync="true"/>
+        <ivy:cachepath pathid="ivy.compile.classpath" conf="default"/>
+        <ivy:cachepath pathid="ivy.test.classpath" conf="default"/>
+
+        <!-- Convert path references to properties -->
+        <pathconvert property="ivy.compile.classpath.prop" refid="ivy.compile.classpath"/>
+        <pathconvert property="ivy.test.classpath.prop" refid="ivy.test.classpath"/>
+
+        <!-- Log the ivy.test.classpath contents -->
+        <pathconvert property="ivy.test.classpath.value" refid="ivy.test.classpath" pathsep="${line.separator}    "/>
+        <echo message="ivy.test.classpath contains:${line.separator}    ${ivy.test.classpath.value}"/>
+        <echo message="=== Ivy resolution complete ==="/>
+    </target>
+
+    <target name="report" depends="resolve" description="Generate Ivy dependency report">
+        <mkdir dir="${ivy.reports.dir}"/>
+        <ivy:report todir="${ivy.reports.dir}"/>
+        <echo message="Ivy dependency report generated in ${ivy.reports.dir}"/>
+    </target>
+
+    <target name="clean-ivy" description="Clean Ivy dependencies">
+        <delete dir="${basedir}/lib"/>
+        <delete dir="${ivy.reports.dir}"/>
+    </target>
+
+    <!-- =================================
+          Test targets
+         ================================= -->
+    <target name="test" depends="resolve, compile-test" description="Run unit tests">
+        <mkdir dir="${build.test.results.dir}"/>
+
+        <!-- Use junitlauncher task for JUnit 5 -->
+        <junitlauncher haltonfailure="true" printSummary="true">
+            <classpath>
+                <path refid="ivy.test.classpath"/>
+                <pathelement location="${build.classes.dir}"/>
+                <pathelement location="${build.test.classes.dir}"/>
+            </classpath>
+
+            <testclasses outputdir="${build.test.results.dir}">
+                <fileset dir="${build.test.classes.dir}">
+                    <include name="**/*Test.class"/>
+                </fileset>
+                <listener type="legacy-xml" sendSysOut="true" sendSysErr="true"/>
+                <listener type="legacy-plain" sendSysOut="true" sendSysErr="true"/>
+            </testclasses>
+        </junitlauncher>
+    </target>
+
+    <!-- =================================
+          Coverage targets
+         ================================= -->
+    <target name="coverage" depends="init-jacoco, resolve, compile-test" description="Run tests with JaCoCo coverage">
+        <mkdir dir="${jacoco.report.dir}"/>
+        <mkdir dir="${build.test.results.dir}"/>
+
+        <!-- Run tests with JaCoCo coverage -->
+        <jacoco:coverage destfile="${jacoco.report.dir}/jacoco.exec">
+            <java classname="org.junit.platform.console.ConsoleLauncher" fork="true" failonerror="false" resultproperty="tests.failed.code">
+                <classpath>
+                    <path refid="ivy.test.classpath"/>
+                    <pathelement location="${build.classes.dir}"/>
+                    <pathelement location="${build.test.classes.dir}"/>
+                </classpath>
+
+                <!-- JUnit 5 arguments -->
+                <arg value="--scan-classpath"/>
+                <arg value="--reports-dir=${build.test.results.dir}"/>
+                <arg value="--include-classname=.*Test"/>
+            </java>
+        </jacoco:coverage>
+
+        <!-- Generate report -->
+        <jacoco:report>
+            <executiondata>
+                <file file="${jacoco.report.dir}/jacoco.exec"/>
+            </executiondata>
+            <structure name="FST">
+                <classfiles>
+                    <fileset dir="${build.classes.dir}"/>
+                </classfiles>
+                <sourcefiles encoding="UTF-8">
+                    <fileset dir="${src.dir}"/>
+                </sourcefiles>
+            </structure>
+            <html destdir="${jacoco.report.dir}/html"/>
+            <xml destfile="${jacoco.report.dir}/coverage.xml"/>
+        </jacoco:report>
+
+        <echo message="JaCoCo coverage report generated in ${jacoco.report.dir}/html"/>
+
+        <!-- Fail the build if tests failed -->
+        <condition property="tests.failed" value="true">
+            <not>
+                <equals arg1="${tests.failed.code}" arg2="0"/>
+            </not>
+        </condition>
+        <fail if="tests.failed" message="Tests failed. Check test reports."/>
+    </target>
+
+    <!-- =================================
+          Override NetBeans targets
+         ================================= -->
+    <target name="-pre-init" depends="init-ivy">
+        <!-- Called before initialization of project properties -->
+    </target>
+
+    <target name="-pre-compile" depends="resolve">
+        <!-- Called before javac compilation -->
+    </target>
+
+    <target name="-pre-compile-test" depends="resolve">
+        <!-- Called before javac compilation of JUnit tests -->
+        <echo message="=== Starting test compilation ==="/>
+
+        <!-- Log the javac.test.classpath -->
+        <echo message="javac.test.classpath = ${javac.test.classpath}"/>
+
+        <!-- Check if ivy.test.classpath is available -->
+        <pathconvert property="ivy.test.classpath.exists" setonempty="false" refid="ivy.test.classpath"/>
+        <condition property="ivy.test.classpath.status" value="AVAILABLE" else="NOT AVAILABLE">
+            <isset property="ivy.test.classpath.exists"/>
+        </condition>
+        <echo message="ivy.test.classpath is ${ivy.test.classpath.status}"/>
+
+        <!-- List JAR files in lib/default directory -->
+        <pathconvert property="lib.jars" pathsep="${line.separator}    ">
+            <fileset dir="${basedir}/lib/default" includes="*.jar"/>
+        </pathconvert>
+        <echo message="JARs in lib/default:${line.separator}    ${lib.jars}"/>
+    </target>
+
+    <target name="-post-clean" depends="clean-ivy">
+        <!-- Called after cleaning build products -->
+        <delete dir="${jacoco.report.dir}"/>
+        <delete dir="${ivy.reports.dir}"/>
+        <delete dir="reports"/>
+    </target>
+
+    <!-- =================================
+          Complete build target
+         ================================= -->
+    <target name="build" depends="compile,jar" description="Performs a complete build (compile and create JAR)">
+        <echo message="Build completed successfully"/>
+    </target>
+
+    <!-- =================================
+          Override javadoc target
+         ================================= -->
+    <target depends="init" if="have.sources" name="-javadoc-build">
+        <mkdir dir="${dist.javadoc.dir}"/>
+
+        <!-- Check endorsed classpath property set correctly -->
+        <condition else="" property="javadoc.endorsed.classpath.cmd.line.arg" value="-J${endorsed.classpath.cmd.line.arg}">
+            <and>
+                <isset property="endorsed.classpath.cmd.line.arg"/>
+                <not>
+                    <equals arg1="${endorsed.classpath.cmd.line.arg}" arg2=""/>
+                </not>
+            </and>
+        </condition>
+
+        <javadoc additionalparam="${javadoc.additionalparam}"
+                 author="true"
+                 charset="UTF-8"
+                 destdir="${dist.javadoc.dir}"
+                 docencoding="UTF-8"
+                 encoding="${javadoc.encoding.used}"
+                 failonerror="true"
+                 noindex="false"
+                 nonavbar="false"
+                 notree="false"
+                 private="true"
+                 source="${javac.source}"
+                 splitindex="true"
+                 use="true"
+                 useexternalfile="true"
+                 version="true"
+                 windowtitle="FST (Free Subliminal Text) API Documentation">
+            <!-- Java 24 API documentation link -->
+            <link href="https://docs.oracle.com/en/java/javase/24/docs/api/"/>
+
+            <!-- Use the project classpath -->
+            <classpath>
+                <path path="${javac.classpath}"/>
+            </classpath>
+
+            <!-- Include all Java source files -->
+            <fileset dir="${src.dir}">
+                <include name="**/*.java"/>
+            </fileset>
+
+            <!-- Pass any endorsed classpath arguments -->
+            <arg line="${javadoc.endorsed.classpath.cmd.line.arg}"/>
+        </javadoc>
+
+        <!-- Copy any documentation resources -->
+        <copy todir="${dist.javadoc.dir}">
+            <fileset dir="${src.dir}" includes="**/doc-files/**"/>
+        </copy>
+    </target>
+
+    <!-- =================================
+          Debug targets
+         ================================= -->
+    <target name="debug-test-compile" depends="init, resolve">
+        <echo message="=== Debug test compilation ==="/>
+
+        <!-- Show test source files -->
+        <pathconvert property="test.sources" pathsep="${line.separator}    ">
+            <fileset dir="${test.src.dir}" includes="**/*.java"/>
+        </pathconvert>
+        <echo message="Test sources:${line.separator}    ${test.sources}"/>
+
+        <!-- Show test classpath -->
+        <echo message="Showing expanded classpath components:"/>
+        <echo message="build.classes.dir = ${build.classes.dir}"/>
+
+        <!-- Create an explicit classpath for compilation -->
+        <path id="explicit.test.classpath">
+            <path refid="ivy.test.classpath"/>
+            <pathelement location="${build.classes.dir}"/>
+        </path>
+
+        <!-- Convert the path to a property for display -->
+        <pathconvert property="explicit.test.classpath.value" refid="explicit.test.classpath" pathsep="${line.separator}    "/>
+        <echo message="Explicit test classpath:${line.separator}    ${explicit.test.classpath.value}"/>
+
+        <!-- Try compiling with explicit classpath -->
+        <mkdir dir="${build.test.classes.dir}"/>
+        <javac srcdir="${test.src.dir}" destdir="${build.test.classes.dir}" debug="true" includeantruntime="false">
+            <classpath refid="explicit.test.classpath"/>
+        </javac>
+        <echo message="Compilation with explicit classpath complete"/>
+    </target>
+
     <!--
 
-    There exist several targets which are by default empty and which can be 
-    used for execution of your tasks. These targets are usually executed 
-    before and after some main targets. They are: 
+    There exist several targets which are by default empty and which can be
+    used for execution of your tasks. These targets are usually executed
+    before and after some main targets. They are:
 
       -pre-init:                 called before initialization of project properties
       -post-init:                called after initialization of project properties
@@ -40,19 +323,19 @@
             </obfuscate>
         </target>
 
-    For list of available properties check the imported 
-    nbproject/build-impl.xml file. 
+    For list of available properties check the imported
+    nbproject/build-impl.xml file.
 
 
     Another way to customize the build is by overriding existing main targets.
-    The targets of interest are: 
+    The targets of interest are:
 
       -init-macrodef-javac:     defines macro for javac compilation
       -init-macrodef-junit:     defines macro for junit execution
       -init-macrodef-debug:     defines macro for class debugging
       -init-macrodef-java:      defines macro for class execution
       -do-jar:                  JAR building
-      run:                      execution of project 
+      run:                      execution of project
       -javadoc-build:           Javadoc generation
       test-report:              JUnit report generation
 
@@ -64,10 +347,10 @@
             </exec>
         </target>
 
-    Notice that the overridden target depends on the jar target and not only on 
-    the compile target as the regular run target does. Again, for a list of available 
+    Notice that the overridden target depends on the jar target and not only on
+    the compile target as the regular run target does. Again, for a list of available
     properties which you can use, check the target you are overriding in the
-    nbproject/build-impl.xml file. 
+    nbproject/build-impl.xml file.
 
     -->
 </project>

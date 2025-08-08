@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fst-config>
+    <display>
+        <font>
+            <family>Arial</family>
+            <size>24</size>
+            <style>0</style>
+            <color>
+                <red>0</red>
+                <green>0</green>
+                <blue>255</blue>
+                <alpha>50</alpha>
+            </color>
+        </font>
+        <timing>
+            <display>150</display>
+            <delay>400</delay>
+        </timing>
+        <position>
+            <horizontal>center</horizontal>
+            <vertical>center</vertical>
+            <margin>50</margin>
+        </position>
+    </display>
+    <messages>
+        <message>Test message 1</message>
+        <message>Test message 2</message>
+        <message>Test message 3</message>
+    </messages>
+    <options>
+        <wordOrder>forward</wordOrder>
+        <letterOrder>forward</letterOrder>
+        <messageOrder>sequential</messageOrder>
+        <minimizeOnStartup>false</minimizeOnStartup>
+        <checkForUpdates>false</checkForUpdates>
+    </options>
+</fst-config>

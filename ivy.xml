@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivy-module version="2.0">
+    <info organisation="fst" module="free-subliminal-text" />
+    <dependencies>
+        <!-- JUnit 5 -->
+        <dependency org="org.junit.jupiter" name="junit-jupiter-api" rev="5.9.2" />
+        <dependency org="org.junit.jupiter" name="junit-jupiter-engine" rev="5.9.2" />
+        <dependency org="org.junit.platform" name="junit-platform-launcher" rev="1.9.2" />
+        <dependency org="org.junit.platform" name="junit-platform-console" rev="1.9.2" />
+
+        <!-- AssertJ -->
+        <dependency org="org.assertj" name="assertj-core" rev="3.24.2" />
+
+        <!-- Mockito -->
+        <dependency org="org.mockito" name="mockito-core" rev="5.3.1" />
+        <dependency org="org.mockito" name="mockito-junit-jupiter" rev="5.3.1" />
+
+        <!-- JaCoCo -->
+        <dependency org="org.jacoco" name="org.jacoco.ant" rev="0.8.8" />
+    </dependencies>
+</ivy-module>
