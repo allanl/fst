@@ -31,72 +31,72 @@ import org.xml.sax.SAXException;
  */
 public class MessageConfigPanel extends javax.swing.JPanel {
 
-	Map<String, List<String>> suggestions;
-	/** Creates new form MessageConfigPanel */
-	public MessageConfigPanel() {
-		
-		initComponents();
-                
+    Map<String, List<String>> suggestions;
+    /** Creates new form MessageConfigPanel */
+    public MessageConfigPanel() {
+
+        initComponents();
+
                 messageOrderBox.setSelectedIndex(FST.messageOrder);
-                
-		StringBuilder sb = new StringBuilder();
-		for (String msg : FST.messages) {
-			sb.append(msg).append("\n");
-		}
-		messagesText.setText(sb.toString());
-		final TransferHandler messagesTransferHandler = messagesText.getTransferHandler();
 
-		messagesText.setTransferHandler(new TransferHandler(null) {
+        StringBuilder sb = new StringBuilder();
+        for (String msg : FST.messages) {
+            sb.append(msg).append("\n");
+        }
+        messagesText.setText(sb.toString());
+        final TransferHandler messagesTransferHandler = messagesText.getTransferHandler();
 
-			@Override
-			public boolean canImport(JComponent jc, DataFlavor[] df) {
-				return messagesTransferHandler.canImport(jc, df);
-			}
+        messagesText.setTransferHandler(new TransferHandler(null) {
 
-			@Override
-			public boolean importData(JComponent com, Transferable t) {
-				try {
-					for (DataFlavor dl : t.getTransferDataFlavors()) {
-						if (dl.isMimeTypeEqual("text/plain") && t.getTransferData(dl) instanceof String) {
-							messagesText.append(String.format("%n%s", (String) t.getTransferData(dl)));
-							messagesTextFocusLost(null);
-							return true;
-						}
-					}
-					return messagesTransferHandler.importData(com,t);
-				} catch (UnsupportedFlavorException ex) {
-					JOptionPane.showMessageDialog(null, "Flavor");
-				} catch (IOException ex) {
-					JOptionPane.showMessageDialog(null, "IO");
-				}
-				return false;
-			}
+            @Override
+            public boolean canImport(JComponent jc, DataFlavor[] df) {
+                return messagesTransferHandler.canImport(jc, df);
+            }
 
-		});
+            @Override
+            public boolean importData(JComponent com, Transferable t) {
+                try {
+                    for (DataFlavor dl : t.getTransferDataFlavors()) {
+                        if (dl.isMimeTypeEqual("text/plain") && t.getTransferData(dl) instanceof String) {
+                            messagesText.append(String.format("%n%s", (String) t.getTransferData(dl)));
+                            messagesTextFocusLost(null);
+                            return true;
+                        }
+                    }
+                    return messagesTransferHandler.importData(com,t);
+                } catch (UnsupportedFlavorException ex) {
+                    JOptionPane.showMessageDialog(null, "Flavor");
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(null, "IO");
+                }
+                return false;
+            }
 
-		suggestions = new HashMap<>();
-		try {
-			Document suggestionXML = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(this.getClass().getResource("Suggestions.xml").openStream());
-			NodeList suggestionGroups = suggestionXML.getElementsByTagName("group");
-			for (int x = 0; x < suggestionGroups.getLength(); x++) {
-				Element groupXML = (Element) suggestionGroups.item(x);
-				List<String> opt = new ArrayList<>();
-				suggestions.put(groupXML.getAttribute("title"), opt);
-				NodeList optItems = groupXML.getElementsByTagName("opt");
-				for (int y = 0; y < optItems.getLength(); y++) {
-					opt.add(optItems.item(y).getTextContent());
-				}
-				Collections.sort(opt);
-			}
-			List<String> groups = new ArrayList<>(suggestions.keySet());
-			Collections.sort(groups);
-			suggestionsCombo.setModel(new DefaultComboBoxModel<>(groups.toArray(new String[0])));
-			suggestionsList.setModel(new DefaultComboBoxModel<>(suggestions.get(groups.get(0)).toArray(new String[0])));
-		} catch (IOException ex) {
-		} catch (SAXException ex) {
-		} catch (ParserConfigurationException ex) {
-		}
-	}
+        });
+
+        suggestions = new HashMap<>();
+        try {
+            Document suggestionXML = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(this.getClass().getResource("Suggestions.xml").openStream());
+            NodeList suggestionGroups = suggestionXML.getElementsByTagName("group");
+            for (int x = 0; x < suggestionGroups.getLength(); x++) {
+                Element groupXML = (Element) suggestionGroups.item(x);
+                List<String> opt = new ArrayList<>();
+                suggestions.put(groupXML.getAttribute("title"), opt);
+                NodeList optItems = groupXML.getElementsByTagName("opt");
+                for (int y = 0; y < optItems.getLength(); y++) {
+                    opt.add(optItems.item(y).getTextContent());
+                }
+                Collections.sort(opt);
+            }
+            List<String> groups = new ArrayList<>(suggestions.keySet());
+            Collections.sort(groups);
+            suggestionsCombo.setModel(new DefaultComboBoxModel<>(groups.toArray(new String[0])));
+            suggestionsList.setModel(new DefaultComboBoxModel<>(suggestions.get(groups.get(0)).toArray(new String[0])));
+        } catch (IOException ex) {
+        } catch (SAXException ex) {
+        } catch (ParserConfigurationException ex) {
+        }
+    }
 
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -184,34 +184,34 @@ public class MessageConfigPanel extends javax.swing.JPanel {
         add(jPanel1, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
-	
-	private void messagesTextFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_messagesTextFocusLost
 
-		FST.messages.clear();
-		StringBuilder sb = new StringBuilder();
-		try {
-			BufferedReader read = new BufferedReader(new StringReader(messagesText.getText()));
-			String msg;
-			while (null != (msg = read.readLine())) {
-				if (msg.length() > 0) {
-					FST.messages.add(msg);
-					sb.append(String.format("%s%n", msg));
-				}
-			}
-		} catch (IOException ex) {}//GEN-LAST:event_messagesTextFocusLost
+    private void messagesTextFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_messagesTextFocusLost
+
+        FST.messages.clear();
+        StringBuilder sb = new StringBuilder();
+        try {
+            BufferedReader read = new BufferedReader(new StringReader(messagesText.getText()));
+            String msg;
+            while (null != (msg = read.readLine())) {
+                if (msg.length() > 0) {
+                    FST.messages.add(msg);
+                    sb.append(String.format("%s%n", msg));
+                }
+            }
+        } catch (IOException ex) {}//GEN-LAST:event_messagesTextFocusLost
 finally {
-			messagesText.setText(sb.toString());
+            messagesText.setText(sb.toString());
                         FST.settingsChanged();
-		}
-	}     
+        }
+    }
 
-	private void suggestionsComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_suggestionsComboActionPerformed
-		suggestionsList.setModel(new DefaultComboBoxModel<>(suggestions.get(suggestionsCombo.getSelectedItem()).toArray(new String[0])));
-	}//GEN-LAST:event_suggestionsComboActionPerformed
+    private void suggestionsComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_suggestionsComboActionPerformed
+        suggestionsList.setModel(new DefaultComboBoxModel<>(suggestions.get(suggestionsCombo.getSelectedItem()).toArray(new String[0])));
+    }//GEN-LAST:event_suggestionsComboActionPerformed
 
-	private void messageOrderBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_messageOrderBoxActionPerformed
-		FST.messageOrder = messageOrderBox.getSelectedIndex();
-		FST.settingsChanged();
+    private void messageOrderBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_messageOrderBoxActionPerformed
+        FST.messageOrder = messageOrderBox.getSelectedIndex();
+        FST.settingsChanged();
 }//GEN-LAST:event_messageOrderBoxActionPerformed
 
     private void messagesTextFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_messagesTextFocusGained
