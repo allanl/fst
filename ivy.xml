@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ivy-module version="2.0">
     <info organisation="fst" module="free-subliminal-text" />
+    <configurations>
+        <conf name="default" description="Runtime dependencies"/>
+        <conf name="test" extends="default" description="Test dependencies"/>
+        <conf name="checkstyle" description="Checkstyle dependencies"/>
+    </configurations>
     <dependencies>
         <!-- JUnit 5 -->
         <dependency org="org.junit.jupiter" name="junit-jupiter-api" rev="5.9.2" />
@@ -17,5 +22,8 @@
 
         <!-- JaCoCo -->
         <dependency org="org.jacoco" name="org.jacoco.ant" rev="0.8.8" />
+
+        <!-- Checkstyle -->
+        <dependency org="com.puppycrawl.tools" name="checkstyle" rev="10.12.5" conf="checkstyle->default"/>
     </dependencies>
 </ivy-module>

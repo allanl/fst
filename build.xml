@@ -158,6 +158,64 @@
     </target>
 
     <!-- =================================
+          Checkstyle targets
+         ================================= -->
+    <property name="checkstyle.dir" value="${basedir}/config/checkstyle"/>
+    <property name="checkstyle.report.dir" value="${basedir}/reports/checkstyle"/>
+
+    <target name="init-checkstyle" depends="init">
+        <!-- Create a dedicated classpath for Checkstyle -->
+        <ivy:cachepath pathid="checkstyle.classpath" conf="checkstyle"/>
+
+        <taskdef resource="com/puppycrawl/tools/checkstyle/ant/checkstyle-ant-task.properties"
+                 classpathref="checkstyle.classpath"/>
+    </target>
+
+    <target name="checkstyle" depends="init-checkstyle" description="Run Checkstyle analysis">
+        <mkdir dir="${checkstyle.report.dir}"/>
+        <checkstyle config="${checkstyle.dir}/checkstyle.xml" failOnViolation="true">
+            <fileset dir="${src.dir}" includes="**/*.java"/>
+            <formatter type="plain"/>
+            <formatter type="xml" toFile="${checkstyle.report.dir}/checkstyle-result.xml"/>
+            <!-- Enable caching for better performance -->
+            <property key="checkstyle.cache.file" value="${checkstyle.report.dir}/checkstyle-cache"/>
+            <!-- Pass basedir property to the configuration file -->
+            <property key="basedir" value="${basedir}"/>
+        </checkstyle>
+
+        <!-- Generate HTML report -->
+        <xslt in="${checkstyle.report.dir}/checkstyle-result.xml"
+              out="${checkstyle.report.dir}/checkstyle-report.html"
+              style="${checkstyle.dir}/checkstyle-frames.xsl"/>
+
+        <echo message="Checkstyle report generated in ${checkstyle.report.dir}"/>
+    </target>
+
+    <!-- Warning-only version that doesn't fail the build -->
+    <target name="checkstyle-warn" depends="init-checkstyle" description="Run Checkstyle analysis without failing the build">
+        <mkdir dir="${checkstyle.report.dir}"/>
+        <checkstyle config="${checkstyle.dir}/checkstyle.xml" failOnViolation="false" maxErrors="1000" maxWarnings="2000">
+            <fileset dir="${src.dir}" includes="**/*.java"/>
+            <formatter type="plain"/>
+            <formatter type="xml" toFile="${checkstyle.report.dir}/checkstyle-result.xml"/>
+            <!-- Enable caching for better performance -->
+            <property key="checkstyle.cache.file" value="${checkstyle.report.dir}/checkstyle-cache"/>
+            <!-- Pass basedir property to the configuration file -->
+            <property key="basedir" value="${basedir}"/>
+        </checkstyle>
+
+        <!-- Generate HTML report -->
+        <xslt in="${checkstyle.report.dir}/checkstyle-result.xml"
+              out="${checkstyle.report.dir}/checkstyle-report.html"
+              style="${checkstyle.dir}/checkstyle-frames.xsl"/>
+
+        <echo message="Checkstyle report generated in ${checkstyle.report.dir}"/>
+    </target>
+
+    <!-- Add to the check target -->
+    <target name="check" depends="compile, checkstyle-warn" description="Run all checks"/>
+
+    <!-- =================================
           Override NetBeans targets
          ================================= -->
     <target name="-pre-init" depends="init-ivy">

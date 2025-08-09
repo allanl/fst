@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+    "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+    "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+
+<suppressions>
+    <!-- Suppress checks for generated code -->
+    <suppress files=".*\.form" checks=".*"/>
+    
+    <!-- Suppress checks for specific files that we can't immediately fix -->
+    <suppress files="Config\.java" checks="VisibilityModifier"/>
+    <suppress files="FST\.java" checks="VisibilityModifier"/>
+    <suppress files="MessageConfigPanel\.java" checks="VisibilityModifier"/>
+    <suppress files="OptionsConfigPanel\.java" checks="VisibilityModifier"/>
+    
+    <!-- Suppress line length checks for specific files with long lines -->
+    <suppress files=".*ConfigPanel\.java" checks="LineLength"/>
+</suppressions>

@@ -43,7 +43,7 @@ Hopefully, it is working, but it may be too subtle for your consciousness (or sc
 ## Notes
 
 ### Linux
-If FST.jar opens in archive manager instead of executing, right-click and select "Open with Other Application", choose "Use a custom command" and type "java -jar". The window manager should remember for next time. 
+If FST.jar opens in archive manager instead of executing, right-click and select "Open with Other Application", choose "Use a custom command" and type "java -jar". The window manager should remember for next time.
 
 ## New Features drafted for future releases
 * More documentation on About Tab
@@ -175,6 +175,17 @@ The project uses JUnit 5 for testing, with AssertJ for assertions and Mockito fo
 Code coverage reports are generated using JaCoCo:
 1. Run `ant coverage`
 2. Open `reports/coverage/html/index.html` in a browser
+
+#### Code Style
+This project follows the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html).
+Checkstyle is used to enforce these standards.
+
+##### Running Checkstyle
+- `ant checkstyle-warn` - Run Checkstyle analysis without failing the build
+- `ant checkstyle` - Run Checkstyle analysis and fail on violations
+- `ant check` - Run all checks including Checkstyle
+
+The Checkstyle report is generated in `reports/checkstyle/checkstyle-report.html`.
 
 ### Creating Releases
 
