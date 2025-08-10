@@ -212,8 +212,91 @@
         <echo message="Checkstyle report generated in ${checkstyle.report.dir}"/>
     </target>
 
+    <!-- =================================
+          Code formatting targets
+         ================================= -->
+    <target name="init-format" depends="init, init-ivy">
+        <ivy:cachepath pathid="ivy.format.classpath" conf="format"/>
+    </target>
+
+    <target name="format" depends="init-format" description="Format Java source files">
+        <echo message="Formatting Java source files..."/>
+
+        <!-- Convert fileset to space-separated list -->
+        <pathconvert property="java.files" pathsep=" ">
+            <fileset dir="${src.dir}" includes="**/*.java"/>
+        </pathconvert>
+
+        <!-- Run Google Java Format -->
+        <exec executable="java" failonerror="true">
+            <arg value="--add-exports"/>
+            <arg value="jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED"/>
+            <arg value="--add-exports"/>
+            <arg value="jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED"/>
+            <arg value="--add-exports"/>
+            <arg value="jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED"/>
+            <arg value="--add-exports"/>
+            <arg value="jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED"/>
+            <arg value="--add-exports"/>
+            <arg value="jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"/>
+            <arg value="-cp"/>
+            <arg value="${toString:ivy.format.classpath}"/>
+            <arg value="com.google.googlejavaformat.java.Main"/>
+            <arg value="--replace"/>
+            <arg line="${java.files}"/>
+        </exec>
+
+        <echo message="Java source files formatted successfully"/>
+    </target>
+
+    <target name="format-check" depends="init-format" description="Check if Java source files are properly formatted">
+        <echo message="Checking Java source file formatting..."/>
+
+        <!-- Convert fileset to space-separated list -->
+        <pathconvert property="java.files" pathsep=" ">
+            <fileset dir="${src.dir}" includes="**/*.java"/>
+        </pathconvert>
+
+        <!-- Run Google Java Format in dry-run mode -->
+        <exec executable="java" failonerror="false" resultproperty="format.result">
+            <arg value="--add-exports"/>
+            <arg value="jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED"/>
+            <arg value="--add-exports"/>
+            <arg value="jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED"/>
+            <arg value="--add-exports"/>
+            <arg value="jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED"/>
+            <arg value="--add-exports"/>
+            <arg value="jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED"/>
+            <arg value="--add-exports"/>
+            <arg value="jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"/>
+            <arg value="-cp"/>
+            <arg value="${toString:ivy.format.classpath}"/>
+            <arg value="com.google.googlejavaformat.java.Main"/>
+            <arg value="--dry-run"/>
+            <arg value="--set-exit-if-changed"/>
+            <arg line="${java.files}"/>
+        </exec>
+
+        <condition property="format.failed">
+            <not>
+                <equals arg1="${format.result}" arg2="0"/>
+            </not>
+        </condition>
+        <echo message="Format check result: ${format.result}"/>
+        <condition property="format.message" value="All Java source files are properly formatted" else="Some Java source files need formatting. Run 'ant format' to fix.">
+            <not>
+                <isset property="format.failed"/>
+            </not>
+        </condition>
+        <echo message="${format.message}"/>
+    </target>
+
+    <target name="format-all" depends="format" description="Format all source files">
+        <echo message="All source files formatted successfully"/>
+    </target>
+
     <!-- Add to the check target -->
-    <target name="check" depends="compile, checkstyle-warn" description="Run all checks"/>
+    <target name="check" depends="compile, checkstyle-warn, format-check" description="Run all checks"/>
 
     <!-- =================================
           Override NetBeans targets

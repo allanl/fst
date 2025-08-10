@@ -5,6 +5,7 @@
         <conf name="default" description="Runtime dependencies"/>
         <conf name="test" extends="default" description="Test dependencies"/>
         <conf name="checkstyle" description="Checkstyle dependencies"/>
+        <conf name="format" description="Code formatting dependencies"/>
     </configurations>
     <dependencies>
         <!-- JUnit 5 -->
@@ -25,5 +26,8 @@
 
         <!-- Checkstyle -->
         <dependency org="com.puppycrawl.tools" name="checkstyle" rev="10.12.5" conf="checkstyle->default"/>
+
+        <!-- Google Java Format -->
+        <dependency org="com.google.googlejavaformat" name="google-java-format" rev="1.17.0" conf="format->default"/>
     </dependencies>
 </ivy-module>

@@ -187,6 +187,19 @@ Checkstyle is used to enforce these standards.
 
 The Checkstyle report is generated in `reports/checkstyle/checkstyle-report.html`.
 
+##### Automatic Code Formatting
+The project uses Google Java Format to automatically format code according to the style guide:
+
+- `ant format` - Format all Java source files
+- `ant format-check` - Check if files are properly formatted without modifying them
+
+**Before submitting code reviews or pull requests:**
+1. Run `ant format` to ensure your code follows the project's style guidelines
+2. Run `ant check` to verify there are no remaining issues
+3. Commit your changes only after formatting and verification
+
+This ensures consistent code style across the project and makes code reviews more efficient by focusing on substance rather than style.
+
 ### Creating Releases
 
 To create a release build:
