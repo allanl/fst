@@ -7,7 +7,7 @@
     <opt>Smoking smells foul</opt>
     <opt>I hate the taste of smoking</opt>
   </group>
-  
+
   <group title="Health">
     <opt>I am slim</opt>
     <opt>Eating fruit and vegetables feels good</opt>
@@ -20,7 +20,7 @@
     <opt>I get enough sleep</opt>
     <opt>I am always well</opt>
   </group>
-  
+
   <group title="Love">
     <opt>I love my partner</opt>
     <opt>I trust my partner</opt>
@@ -29,7 +29,7 @@
     <opt>I fantasize about my partner</opt>
     <opt>I do things that please my partner</opt>
   </group>
-  
+
   <group title="Well Being">
     <opt>I am full of life</opt>
     <opt>I love the way I am</opt>
@@ -38,7 +38,7 @@
     <opt>I forgive myself for my mistakes</opt>
     <opt>I forgive others for their mistakes</opt>
   </group>
-  
+
   <group title="Social">
     <opt>I remember persons' names</opt>
     <opt>I ask good questions</opt>
@@ -49,7 +49,7 @@
     <opt>I organize events for my friends</opt>
     <opt>I like to try new things</opt>
   </group>
-  
+
   <group title="Success">
     <opt>I enjoy being successful</opt>
     <opt>I make goals</opt>
