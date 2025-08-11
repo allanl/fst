@@ -171,45 +171,43 @@
                  classpathref="checkstyle.classpath"/>
     </target>
 
+    <!-- Define a macro for checkstyle execution -->
+    <macrodef name="run-checkstyle">
+        <attribute name="failOnViolation" default="true"/>
+        <attribute name="maxErrors" default="0"/>
+        <attribute name="maxWarnings" default="0"/>
+        <sequential>
+            <mkdir dir="${checkstyle.report.dir}"/>
+            <checkstyle config="${checkstyle.dir}/checkstyle.xml"
+                       failOnViolation="@{failOnViolation}"
+                       maxErrors="@{maxErrors}"
+                       maxWarnings="@{maxWarnings}">
+                <fileset dir="${src.dir}" includes="**/*.java"/>
+                <formatter type="plain"/>
+                <formatter type="xml" toFile="${checkstyle.report.dir}/checkstyle-result.xml"/>
+                <!-- Enable caching for better performance -->
+                <property key="checkstyle.cache.file" value="${checkstyle.report.dir}/checkstyle-cache"/>
+                <!-- Pass basedir property to the configuration file -->
+                <property key="basedir" value="${basedir}"/>
+            </checkstyle>
+
+            <!-- Generate HTML report -->
+            <xslt in="${checkstyle.report.dir}/checkstyle-result.xml"
+                  out="${checkstyle.report.dir}/checkstyle-report.html"
+                  style="${checkstyle.dir}/checkstyle-frames.xsl"/>
+
+            <echo message="Checkstyle report generated in ${checkstyle.report.dir}"/>
+        </sequential>
+    </macrodef>
+
+    <!-- Strict checkstyle that fails the build on violations -->
     <target name="checkstyle" depends="init-checkstyle" description="Run Checkstyle analysis">
-        <mkdir dir="${checkstyle.report.dir}"/>
-        <checkstyle config="${checkstyle.dir}/checkstyle.xml" failOnViolation="true">
-            <fileset dir="${src.dir}" includes="**/*.java"/>
-            <formatter type="plain"/>
-            <formatter type="xml" toFile="${checkstyle.report.dir}/checkstyle-result.xml"/>
-            <!-- Enable caching for better performance -->
-            <property key="checkstyle.cache.file" value="${checkstyle.report.dir}/checkstyle-cache"/>
-            <!-- Pass basedir property to the configuration file -->
-            <property key="basedir" value="${basedir}"/>
-        </checkstyle>
-
-        <!-- Generate HTML report -->
-        <xslt in="${checkstyle.report.dir}/checkstyle-result.xml"
-              out="${checkstyle.report.dir}/checkstyle-report.html"
-              style="${checkstyle.dir}/checkstyle-frames.xsl"/>
-
-        <echo message="Checkstyle report generated in ${checkstyle.report.dir}"/>
+        <run-checkstyle failOnViolation="true"/>
     </target>
 
     <!-- Warning-only version that doesn't fail the build -->
     <target name="checkstyle-warn" depends="init-checkstyle" description="Run Checkstyle analysis without failing the build">
-        <mkdir dir="${checkstyle.report.dir}"/>
-        <checkstyle config="${checkstyle.dir}/checkstyle.xml" failOnViolation="false" maxErrors="1000" maxWarnings="2000">
-            <fileset dir="${src.dir}" includes="**/*.java"/>
-            <formatter type="plain"/>
-            <formatter type="xml" toFile="${checkstyle.report.dir}/checkstyle-result.xml"/>
-            <!-- Enable caching for better performance -->
-            <property key="checkstyle.cache.file" value="${checkstyle.report.dir}/checkstyle-cache"/>
-            <!-- Pass basedir property to the configuration file -->
-            <property key="basedir" value="${basedir}"/>
-        </checkstyle>
-
-        <!-- Generate HTML report -->
-        <xslt in="${checkstyle.report.dir}/checkstyle-result.xml"
-              out="${checkstyle.report.dir}/checkstyle-report.html"
-              style="${checkstyle.dir}/checkstyle-frames.xsl"/>
-
-        <echo message="Checkstyle report generated in ${checkstyle.report.dir}"/>
+        <run-checkstyle failOnViolation="false" maxErrors="1000" maxWarnings="2000"/>
     </target>
 
     <!-- =================================
@@ -219,63 +217,46 @@
         <ivy:cachepath pathid="ivy.format.classpath" conf="format"/>
     </target>
 
+    <!-- Define JVM arguments for Google Java Format -->
+    <property name="format.jvm.args" value="--add-exports jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED --add-exports jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED --add-exports jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED --add-exports jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED --add-exports jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"/>
+
+    <!-- Define a macro for Google Java Format execution -->
+    <macrodef name="run-google-java-format">
+        <attribute name="mode" default="--replace"/>
+        <attribute name="failonerror" default="true"/>
+        <attribute name="resultproperty" default=""/>
+        <sequential>
+            <!-- Convert fileset to space-separated list -->
+            <pathconvert property="java.files" pathsep=" ">
+                <fileset dir="${src.dir}" includes="**/*.java"/>
+            </pathconvert>
+
+            <!-- Set up mode-specific arguments -->
+            <condition property="format.mode.args" value="--dry-run --set-exit-if-changed" else="@{mode}">
+                <equals arg1="@{mode}" arg2="--dry-run"/>
+            </condition>
+
+            <!-- Run Google Java Format -->
+            <exec executable="java" failonerror="@{failonerror}" resultproperty="@{resultproperty}">
+                <arg line="${format.jvm.args}"/>
+                <arg value="-cp"/>
+                <arg value="${toString:ivy.format.classpath}"/>
+                <arg value="com.google.googlejavaformat.java.Main"/>
+                <arg line="${format.mode.args}"/>
+                <arg line="${java.files}"/>
+            </exec>
+        </sequential>
+    </macrodef>
+
     <target name="format" depends="init-format" description="Format Java source files">
         <echo message="Formatting Java source files..."/>
-
-        <!-- Convert fileset to space-separated list -->
-        <pathconvert property="java.files" pathsep=" ">
-            <fileset dir="${src.dir}" includes="**/*.java"/>
-        </pathconvert>
-
-        <!-- Run Google Java Format -->
-        <exec executable="java" failonerror="true">
-            <arg value="--add-exports"/>
-            <arg value="jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED"/>
-            <arg value="--add-exports"/>
-            <arg value="jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED"/>
-            <arg value="--add-exports"/>
-            <arg value="jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED"/>
-            <arg value="--add-exports"/>
-            <arg value="jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED"/>
-            <arg value="--add-exports"/>
-            <arg value="jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"/>
-            <arg value="-cp"/>
-            <arg value="${toString:ivy.format.classpath}"/>
-            <arg value="com.google.googlejavaformat.java.Main"/>
-            <arg value="--replace"/>
-            <arg line="${java.files}"/>
-        </exec>
-
+        <run-google-java-format mode="--replace" failonerror="true"/>
         <echo message="Java source files formatted successfully"/>
     </target>
 
     <target name="format-check" depends="init-format" description="Check if Java source files are properly formatted">
         <echo message="Checking Java source file formatting..."/>
-
-        <!-- Convert fileset to space-separated list -->
-        <pathconvert property="java.files" pathsep=" ">
-            <fileset dir="${src.dir}" includes="**/*.java"/>
-        </pathconvert>
-
-        <!-- Run Google Java Format in dry-run mode -->
-        <exec executable="java" failonerror="false" resultproperty="format.result">
-            <arg value="--add-exports"/>
-            <arg value="jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED"/>
-            <arg value="--add-exports"/>
-            <arg value="jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED"/>
-            <arg value="--add-exports"/>
-            <arg value="jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED"/>
-            <arg value="--add-exports"/>
-            <arg value="jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED"/>
-            <arg value="--add-exports"/>
-            <arg value="jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"/>
-            <arg value="-cp"/>
-            <arg value="${toString:ivy.format.classpath}"/>
-            <arg value="com.google.googlejavaformat.java.Main"/>
-            <arg value="--dry-run"/>
-            <arg value="--set-exit-if-changed"/>
-            <arg line="${java.files}"/>
-        </exec>
+        <run-google-java-format mode="--dry-run" failonerror="false" resultproperty="format.result"/>
 
         <condition property="format.failed">
             <not>
