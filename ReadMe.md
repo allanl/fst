@@ -135,28 +135,125 @@ fst/
 
 ### Build Targets
 
-The following Ant targets are available:
+FST uses a comprehensive build system with **Ant as Single Source of Truth**. All build logic lives in `build.xml`, ensuring identical behavior between local development and CI/CD environments.
+
+#### Development Workflow Targets
+
+These targets are optimized for fast feedback during development:
+
+- `ant quick-test` - **Fast development cycle** (compile + test)
+  - Ideal for rapid iteration during coding
+  - Skips slow quality checks for speed
+
+- `ant dev-check` - **Quick development validation** (test + style warnings)
+  - Runs tests and style checks without failing the build
+  - Perfect for checking your work before committing
+
+- `ant dev` - **Clean development cycle** (clean + compile + test + style)
+  - Full clean build with basic quality checks
+  - Good for ensuring a clean state
+
+- `ant pre-commit` - **Pre-commit validation** (format + dev-check)
+  - Formats code and runs development checks
+  - Run this before committing to ensure code quality
+
+#### Quality Assurance Targets
+
+These targets provide comprehensive quality analysis:
+
+- `ant check` - **Complete quality check** (test + coverage + style + bugs, warnings only)
+  - Runs all quality tools without failing the build
+  - Generates comprehensive reports for review
+
+- `ant ci-check` - **Strict CI checks** (test + coverage + style + bugs, strict mode)
+  - Same as `check` but fails on violations
+  - Used in CI/CD for quality gates
+
+- `ant ci-pipeline` - **Complete CI/CD pipeline** (clean + ci-check)
+  - Full pipeline including clean build
+  - Matches exactly what runs in GitHub Actions
+
+- `ant coverage` - **Test coverage analysis**
+  - Runs tests with JaCoCo coverage analysis
+  - Generates HTML and XML coverage reports
+
+#### Code Quality Targets
+
+Individual quality tools for focused analysis:
+
+- `ant format` - **Format source code** (applies Google Java Format)
+- `ant format-check` - **Check code formatting** (without modifying files)
+- `ant checkstyle` - **Style check** (strict mode, fails on violations)
+- `ant checkstyle-warn` - **Style check** (warning mode, doesn't fail build)
+- `ant spotbugs` - **Static analysis** (strict mode, fails on violations)
+- `ant spotbugs-warn` - **Static analysis** (warning mode, doesn't fail build)
 
 #### Core Build Targets
-- `ant clean` - Removes all build artifacts
-- `ant compile` - Compiles the source code
-- `ant jar` - Creates the executable JAR file
-- `ant run` - Runs the application
-- `ant javadoc` - Generates JavaDoc documentation
+
+Standard build operations:
+
+- `ant clean` - Remove all build artifacts
+- `ant compile` - Compile source code
+- `ant build` - Complete build (compile + jar)
+- `ant test` - Run unit tests
+- `ant jar` - Create executable JAR file
+- `ant run` - Run the application
+- `ant javadoc` - Generate API documentation
 
 #### Dependency Management
-- `ant resolve` - Downloads dependencies using Ivy
-- `ant report` - Generates a dependency report
-- `ant clean-ivy` - Removes downloaded dependencies
 
-#### Testing
-- `ant compile-test` - Compiles test classes
-- `ant test` - Runs unit tests
-- `ant coverage` - Runs tests with code coverage analysis
+- `ant resolve` - Download dependencies using Ivy
+- `ant report` - Generate dependency report
+- `ant clean-ivy` - Remove downloaded dependencies
 
-#### Complete Build
-- `ant clean build` - Performs a clean build
-- `ant clean build test` - Performs a clean build and runs tests
+#### Utility Targets
+
+- `ant summary` - **Display all available targets** with descriptions
+- `ant validate-ci-parity` - **Ensure local/CI consistency**
+
+#### Target Usage Examples
+
+**Daily Development Workflow:**
+```bash
+# Fast iteration during coding
+ant quick-test
+
+# Check your work before committing
+ant pre-commit
+
+# Full local validation (matches CI)
+ant ci-pipeline
+```
+
+**Quality Analysis:**
+```bash
+# Check everything without failing
+ant check
+
+# Focus on specific quality aspects
+ant coverage
+ant checkstyle-warn
+ant spotbugs-warn
+```
+
+**CI/CD Integration:**
+```bash
+# Fast checks (format + style)
+ant format-check checkstyle
+
+# Complete CI pipeline
+ant ci-pipeline
+```
+
+#### Progressive Validation Strategy
+
+The build targets follow a **progressive validation** approach:
+
+1. **Development** (`quick-test`, `dev-check`) - Fast feedback, warnings only
+2. **Pre-commit** (`pre-commit`, `check`) - Comprehensive but non-blocking
+3. **CI/CD** (`ci-check`, `ci-pipeline`) - Strict enforcement, fails on violations
+
+This ensures developers get fast feedback locally while maintaining strict quality gates in CI/CD.
 
 ### Testing
 
@@ -225,71 +322,109 @@ To create a release build:
 3. Run `ant clean jar`
 4. The release JAR will be in the `dist/` directory
 
-### Setting Up Continuous Integration
+### Continuous Integration & Deployment
 
-Continuous Integration (CI) is not currently set up for this project, but can be added using one of the following services:
+FST uses **GitHub Actions** for CI/CD with an **Ant as Single Source of Truth** architecture. This ensures identical behavior between local development and CI environments.
 
-#### GitHub Actions (Recommended)
-To set up GitHub Actions:
-1. Create a `.github/workflows` directory in the project root
-2. Add a workflow file (e.g., `build.yml`) with the following content:
-   ```yaml
-   name: Java CI with Ant
+#### CI/CD Architecture
 
-   on:
-     push:
-       branches: [ main ]
-     pull_request:
-       branches: [ main ]
+**Key Principles:**
+- **Single Source of Truth**: All build logic in `build.xml`
+- **Local/CI Parity**: "If it works locally, it works in CI"
+- **Zero Duplication**: GitHub Actions calls Ant targets directly
+- **Progressive Validation**: Fast checks → comprehensive testing → artifact generation
 
-   jobs:
-     build:
-       runs-on: ubuntu-latest
-       steps:
-       - uses: actions/checkout@v3
-       - name: Set up JDK 8
-         uses: actions/setup-java@v3
-         with:
-           java-version: '8'
-           distribution: 'temurin'
-       - name: Build with Ant
-         run: ant -noinput -buildfile build.xml resolve test
-       - name: Generate coverage report
-         run: ant -noinput -buildfile build.xml coverage
-       - name: Archive test results
-         uses: actions/upload-artifact@v3
-         with:
-           name: test-results
-           path: build/test/results
-       - name: Archive coverage report
-         uses: actions/upload-artifact@v3
-         with:
-           name: coverage-report
-           path: reports/coverage
-   ```
+#### GitHub Actions Workflow
 
-#### Jenkins
-For a self-hosted Jenkins setup:
-1. Install Jenkins on your server
-2. Create a new Jenkins job for the project
-3. Configure it to use the Ant build script
-4. Set up build triggers (e.g., poll SCM)
-5. Add build steps to run `ant resolve test coverage`
-6. Configure post-build actions to publish test results and coverage reports
+The CI/CD pipeline consists of three main phases:
 
-#### Travis CI
-To use Travis CI:
-1. Create a `.travis.yml` file in the project root:
-   ```yaml
-   language: java
-   jdk:
-     - openjdk8
-   before_install:
-     - chmod +x build.xml
-   script:
-     - ant resolve test coverage
-   ```
-2. Connect your repository to Travis CI
+1. **Fast Checks** (5 minutes)
+   - Code formatting validation
+   - Style checking with Checkstyle
+   - Fails fast to provide immediate feedback
+
+2. **Build & Test Matrix** (15 minutes per Java version)
+   - Tests on Java 8, 11, 17, and 21
+   - Complete CI pipeline: `ant ci-pipeline`
+   - Coverage analysis and quality reports
+
+3. **Artifact Generation** (10 minutes per Java version)
+   - Multi-Java JAR builds for distribution
+   - Only runs after all tests pass
+
+#### Local Development Integration
+
+**The beauty of this approach**: The same commands work locally and in CI:
+
+```bash
+# What developers run locally
+ant format-check checkstyle    # Fast checks
+ant ci-pipeline                # Full CI pipeline
+
+# What GitHub Actions runs
+- name: Fast Checks
+  run: ant format-check checkstyle
+
+- name: CI Pipeline
+  run: ant ci-pipeline
+```
+
+#### Multi-Java Compatibility
+
+The project supports multiple Java versions:
+
+| Java Version | Purpose | Artifact |
+|--------------|---------|----------|
+| Java 8 | Legacy Support | `fst-java8-latest.jar` |
+| Java 11 | LTS Support | `fst-java11-latest.jar` |
+| Java 17 | **Primary Target** | `fst-java17-latest.jar` |
+| Java 21 | Future Compatibility | `fst-java21-latest.jar` |
+
+#### Quality Gates
+
+**Build-Failing Checks:**
+- ❌ Code formatting (Google Java Format)
+- ❌ Style violations (Checkstyle)
+
+**Warning-Only Checks:**
+- ⚠️ Static analysis issues (SpotBugs)
+- ⚠️ Coverage analysis (JaCoCo)
+
+#### Artifact Downloads
+
+After successful builds, download artifacts from:
+1. **GitHub Actions Tab** → Latest successful run → Artifacts
+2. Choose the appropriate Java version for your runtime
+
+#### Setting Up CI/CD
+
+The CI/CD pipeline is already configured. To enable it:
+
+1. **Enable GitHub Actions** in repository settings
+2. **Configure branch protection** to require CI success
+3. **That's it!** The pipeline uses existing Ant targets
+
+#### Local CI Validation
+
+Validate that your local build matches CI:
+
+```bash
+# Ensure local/CI parity
+ant validate-ci-parity
+
+# Run the exact same pipeline as CI
+ant ci-pipeline
+```
+
+#### Benefits of This Architecture
+
+- ✅ **Zero Maintenance**: Changes only needed in `build.xml`
+- ✅ **Developer Confidence**: Local success = CI success
+- ✅ **Easy Debugging**: Same commands work everywhere
+- ✅ **Fast Feedback**: Progressive validation strategy
+- ✅ **Multi-Java Support**: Comprehensive compatibility testing
+
+For detailed CI/CD implementation information, see `CI-CD-IMPLEMENTATION-PLAN.md`.
 
 ### Troubleshooting Development Issues
 

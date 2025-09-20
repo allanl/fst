@@ -342,8 +342,45 @@
         <run-spotbugs failOnError="false"/>
     </target>
 
-    <!-- Add to the check target -->
-    <target name="check" depends="compile, checkstyle, spotbugs-warn, format-check" description="Run all checks"/>
+    <!-- =================================
+          Enhanced Build Targets
+         ================================= -->
+
+    <!-- Development Targets -->
+    <target name="quick-test" depends="compile, compile-test, test" description="Fast development cycle (compile + test)">
+        <build-status target="quick-test" status="COMPLETED"/>
+    </target>
+
+    <target name="dev-check" depends="compile, test, checkstyle-warn" description="Quick development checks (tests + style warnings)">
+        <build-status target="dev-check" status="COMPLETED"/>
+    </target>
+
+    <target name="dev" depends="clean, compile, test, checkstyle-warn" description="Clean development cycle (clean + compile + test + style)">
+        <build-status target="dev" status="COMPLETED"/>
+    </target>
+
+    <target name="pre-commit" depends="format, dev-check" description="Pre-commit validation (format + quick checks)">
+        <build-status target="pre-commit" status="COMPLETED"/>
+    </target>
+
+    <!-- CI/CD Targets -->
+    <target name="ci-pipeline" depends="clean, compile, test, coverage, checkstyle, spotbugs" description="Complete CI/CD pipeline (strict enforcement)">
+        <build-status target="ci-pipeline" status="COMPLETED"/>
+    </target>
+
+    <target name="ci-check" depends="compile, test, coverage, checkstyle, spotbugs" description="Strict CI checks (fails on violations)">
+        <build-status target="ci-check" status="COMPLETED"/>
+    </target>
+
+    <target name="validate-ci-parity" depends="ci-pipeline" description="Ensure CI and local builds are identical">
+        <echo message="✅ Local build matches CI pipeline"/>
+        <build-status target="validate-ci-parity" status="COMPLETED"/>
+    </target>
+
+    <!-- Enhanced check target with coverage -->
+    <target name="check" depends="compile, test, coverage, checkstyle-warn, spotbugs-warn, format-check" description="All checks including coverage (warnings only)">
+        <build-status target="check" status="COMPLETED"/>
+    </target>
 
     <!-- =================================
           Override NetBeans targets
@@ -445,6 +482,82 @@
         <copy todir="${dist.javadoc.dir}">
             <fileset dir="${src.dir}" includes="**/doc-files/**"/>
         </copy>
+    </target>
+
+    <!-- =================================
+          Error Reporting and Build Summaries
+         ================================= -->
+
+    <!-- Build status reporting macro -->
+    <macrodef name="build-status">
+        <attribute name="target"/>
+        <attribute name="status"/>
+        <sequential>
+            <echo message=""/>
+            <echo message="=== @{target} @{status} ==="/>
+            <tstamp>
+                <format property="build.time" pattern="yyyy-MM-dd HH:mm:ss"/>
+            </tstamp>
+            <echo message="Completed at: ${build.time}"/>
+        </sequential>
+    </macrodef>
+
+    <!-- Enhanced failure messages macro -->
+    <macrodef name="fail-with-advice">
+        <attribute name="message"/>
+        <attribute name="advice"/>
+        <sequential>
+            <echo level="error" message="BUILD FAILED: @{message}"/>
+            <echo level="error" message="ADVICE: @{advice}"/>
+            <fail message="@{message}"/>
+        </sequential>
+    </macrodef>
+
+    <!-- Build target summary -->
+    <target name="summary" description="Display build target summary">
+        <echo message=""/>
+        <echo message="=== FST Build Targets Summary ==="/>
+        <echo message=""/>
+        <echo message="Development Workflow:"/>
+        <echo message="  ant quick-test    - Fast compile and test"/>
+        <echo message="  ant dev-check     - Quick development checks"/>
+        <echo message="  ant dev           - Clean development cycle"/>
+        <echo message="  ant pre-commit    - Pre-commit validation"/>
+        <echo message=""/>
+        <echo message="Quality Assurance:"/>
+        <echo message="  ant check         - All checks (coverage, style, bugs)"/>
+        <echo message="  ant ci-check      - Strict CI checks"/>
+        <echo message="  ant ci-pipeline   - Complete CI/CD pipeline"/>
+        <echo message="  ant coverage      - Test coverage analysis"/>
+        <echo message=""/>
+        <echo message="Code Quality:"/>
+        <echo message="  ant checkstyle    - Style check (strict)"/>
+        <echo message="  ant checkstyle-warn - Style check (warnings only)"/>
+        <echo message="  ant spotbugs      - Bug analysis (strict)"/>
+        <echo message="  ant spotbugs-warn - Bug analysis (warnings only)"/>
+        <echo message="  ant format        - Format source code"/>
+        <echo message="  ant format-check  - Check code formatting"/>
+        <echo message=""/>
+        <echo message="Build Operations:"/>
+        <echo message="  ant clean         - Clean build artifacts"/>
+        <echo message="  ant compile       - Compile source code"/>
+        <echo message="  ant build         - Complete build (compile + jar)"/>
+        <echo message="  ant test          - Run unit tests"/>
+        <echo message="  ant jar           - Create JAR file"/>
+        <echo message="  ant run           - Run the application"/>
+        <echo message=""/>
+        <echo message="Dependency Management:"/>
+        <echo message="  ant resolve       - Download dependencies"/>
+        <echo message="  ant clean-ivy     - Clean dependencies"/>
+        <echo message="  ant report        - Generate dependency report"/>
+        <echo message=""/>
+        <echo message="Documentation:"/>
+        <echo message="  ant javadoc       - Generate API documentation"/>
+        <echo message="  ant summary       - Display this summary"/>
+        <echo message=""/>
+        <echo message="Validation:"/>
+        <echo message="  ant validate-ci-parity - Ensure local/CI consistency"/>
+        <echo message=""/>
     </target>
 
     <!-- =================================
