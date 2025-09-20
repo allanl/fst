@@ -4,6 +4,7 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
@@ -23,7 +24,8 @@ public class Config extends javax.swing.JFrame implements Runnable {
 
     try { // Load instructions
       aboutPane.setText(
-          new Scanner(this.getClass().getResource("About.html").openStream())
+          new Scanner(
+                  this.getClass().getResource("About.html").openStream(), StandardCharsets.UTF_8)
               .useDelimiter("\\Z")
               .next()
               .replaceAll("\\#VERSION\\#", FST.VERSION));
@@ -129,19 +131,21 @@ public class Config extends javax.swing.JFrame implements Runnable {
   public void run() {
     try {
       URL url = new URI("http://richard.warburton.it/fst/version.php").toURL();
-      BufferedReader br =
-          new BufferedReader(new InputStreamReader(url.openConnection().getInputStream()));
-      String currentVersion = br.readLine();
-      if (FST.VERSION.compareTo(currentVersion) < 0) {
-        JOptionPane.showMessageDialog(
-            null,
-            "A new Free Subliminal Text update has been released.\n"
-                + "Please visit http://richard.warburton.it/fst",
-            "FST - New Update Available",
-            JOptionPane.INFORMATION_MESSAGE);
+      try (InputStreamReader reader =
+              new InputStreamReader(url.openConnection().getInputStream(), StandardCharsets.UTF_8);
+          BufferedReader br = new BufferedReader(reader)) {
+        String currentVersion = br.readLine();
+        if (FST.VERSION.compareTo(currentVersion) < 0) {
+          JOptionPane.showMessageDialog(
+              null,
+              "A new Free Subliminal Text update has been released.\n"
+                  + "Please visit http://richard.warburton.it/fst",
+              "FST - New Update Available",
+              JOptionPane.INFORMATION_MESSAGE);
+        }
+        FST.nextUpdate = System.currentTimeMillis() / 1000L + 30L * 86400L;
+        FST.save();
       }
-      FST.nextUpdate = System.currentTimeMillis() / 1000L + 30L * 86400L;
-      FST.save();
     } catch (IOException | URISyntaxException ex) {
       System.out.println("Error: " + ex);
     }

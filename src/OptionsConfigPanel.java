@@ -14,7 +14,7 @@ public class OptionsConfigPanel extends javax.swing.JPanel {
   private static final String SAMPLE_TEXT = "FST Sample Text";
   public static String sampleText;
 
-  protected static KeyAdapter digitsOnly =
+  protected static final KeyAdapter DIGITS_ONLY =
       new KeyAdapter() {
         @Override
         public void keyTyped(KeyEvent e) {
@@ -42,7 +42,7 @@ public class OptionsConfigPanel extends javax.swing.JPanel {
     initComponents();
     sampleText = FST.orderMessage(SAMPLE_TEXT);
 
-    sizeField.addKeyListener(digitsOnly);
+    sizeField.addKeyListener(DIGITS_ONLY);
     GraphicsEnvironment gEnv = GraphicsEnvironment.getLocalGraphicsEnvironment();
     familyCombo.setModel(new DefaultComboBoxModel<>(gEnv.getAvailableFontFamilyNames()));
     Color o = FST.fontColour;
@@ -52,10 +52,10 @@ public class OptionsConfigPanel extends javax.swing.JPanel {
     sizeField.setText(Integer.toString(FST.font.getSize()));
     alphaSlider.setValue(FST.fontColour.getAlpha());
 
-    xMarginField.addKeyListener(digitsOnly);
-    yMarginField.addKeyListener(digitsOnly);
-    displayField.addKeyListener(digitsOnly);
-    delayField.addKeyListener(digitsOnly);
+    xMarginField.addKeyListener(DIGITS_ONLY);
+    yMarginField.addKeyListener(DIGITS_ONLY);
+    displayField.addKeyListener(DIGITS_ONLY);
+    delayField.addKeyListener(DIGITS_ONLY);
 
     xMarginField.setText(Integer.toString(FST.marginX));
     yMarginField.setText(Integer.toString(FST.marginY));

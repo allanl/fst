@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
@@ -64,6 +65,7 @@ public class FST extends JFrame {
   static int configWindow = 1;
   static long nextUpdate = System.currentTimeMillis() / 1000L + 30L * 86400L;
   static boolean checkUpdates = true;
+  private static final Random IRANDOM = new Random();
   private String text;
   private FontMetrics fontMetrics;
   private Toolkit toolkit;
@@ -420,7 +422,7 @@ public class FST extends JFrame {
       case CENTER:
         return (length - width) / 2;
       case RANDOM:
-        return margin + (int) ((length - width - 2 * margin) * Math.random());
+        return margin + IRANDOM.nextInt(length - width - 2 * margin);
       default:
         return mode;
     }
