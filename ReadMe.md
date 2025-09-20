@@ -187,6 +187,22 @@ Checkstyle is used to enforce these standards.
 
 The Checkstyle report is generated in `reports/checkstyle/checkstyle-report.html`.
 
+#### Static Analysis
+This project uses SpotBugs for static analysis to detect potential bugs and code quality issues.
+
+##### Running SpotBugs
+- `ant spotbugs-warn` - Run SpotBugs analysis without failing the build
+- `ant spotbugs` - Run SpotBugs analysis and fail on violations
+- `ant check` - Run all checks including SpotBugs (in warning mode)
+
+SpotBugs reports are generated in both HTML and XML formats:
+- HTML report: `reports/spotbugs/spotbugs-report.html`
+- XML report: `reports/spotbugs/spotbugs-result.xml`
+
+The SpotBugs configuration can be customized by editing:
+- `config/spotbugs/spotbugs.xml` - Main configuration settings
+- `config/spotbugs/spotbugs-exclude.xml` - Exclude filters for false positives
+
 ##### Automatic Code Formatting
 The project uses Google Java Format to automatically format code according to the style guide:
 

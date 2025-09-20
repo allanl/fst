@@ -276,8 +276,74 @@
         <echo message="All source files formatted successfully"/>
     </target>
 
+    <!-- =================================
+          SpotBugs targets
+         ================================= -->
+    <property name="spotbugs.dir" value="${basedir}/config/spotbugs"/>
+    <property name="spotbugs.report.dir" value="${basedir}/reports/spotbugs"/>
+
+    <target name="init-spotbugs" depends="init">
+        <!-- Create a dedicated classpath for SpotBugs -->
+        <ivy:cachepath pathid="spotbugs.classpath" conf="spotbugs"/>
+
+        <taskdef name="spotbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask"
+                 classpathref="spotbugs.classpath"/>
+    </target>
+
+    <!-- Define a macro for SpotBugs execution -->
+    <macrodef name="run-spotbugs">
+        <attribute name="failOnError" default="true"/>
+        <sequential>
+            <mkdir dir="${spotbugs.report.dir}"/>
+
+            <!-- Create auxiliary classpath from resolved Ivy dependencies -->
+            <path id="spotbugs.aux.classpath">
+                <path refid="ivy.compile.classpath"/>
+            </path>
+
+            <spotbugs output="xml:withMessages"
+                     outputFile="${spotbugs.report.dir}/spotbugs-result.xml"
+                     excludeFilter="${spotbugs.dir}/spotbugs-exclude.xml"
+                     reportLevel="medium"
+                     effort="default"
+                     timeout="600000"
+                     failOnError="@{failOnError}">
+                <auxClasspath refid="spotbugs.aux.classpath"/>
+                <sourcePath path="${src.dir}"/>
+                <class location="${build.classes.dir}"/>
+                <classpath refid="spotbugs.classpath"/>
+            </spotbugs>
+
+            <!-- Generate HTML report -->
+            <spotbugs output="html"
+                     outputFile="${spotbugs.report.dir}/spotbugs-report.html"
+                     excludeFilter="${spotbugs.dir}/spotbugs-exclude.xml"
+                     reportLevel="medium"
+                     effort="default"
+                     timeout="600000"
+                     failOnError="false">
+                <auxClasspath refid="spotbugs.aux.classpath"/>
+                <sourcePath path="${src.dir}"/>
+                <class location="${build.classes.dir}"/>
+                <classpath refid="spotbugs.classpath"/>
+            </spotbugs>
+
+            <echo message="SpotBugs report generated in ${spotbugs.report.dir}"/>
+        </sequential>
+    </macrodef>
+
+    <!-- Strict SpotBugs that fails the build on violations -->
+    <target name="spotbugs" depends="init-spotbugs, resolve, compile" description="Run SpotBugs analysis">
+        <run-spotbugs failOnError="true"/>
+    </target>
+
+    <!-- Warning-only version that doesn't fail the build -->
+    <target name="spotbugs-warn" depends="init-spotbugs, resolve, compile" description="Run SpotBugs analysis without failing the build">
+        <run-spotbugs failOnError="false"/>
+    </target>
+
     <!-- Add to the check target -->
-    <target name="check" depends="compile, checkstyle, format-check" description="Run all checks"/>
+    <target name="check" depends="compile, checkstyle, spotbugs-warn, format-check" description="Run all checks"/>
 
     <!-- =================================
           Override NetBeans targets

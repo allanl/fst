@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <!-- SpotBugs exclusion filters for FST project -->
+    <!-- Add exclusions here after reviewing actual SpotBugs findings -->
+</FindBugsFilter>

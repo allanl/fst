@@ -6,6 +6,7 @@
         <conf name="test" extends="default" description="Test dependencies"/>
         <conf name="checkstyle" description="Checkstyle dependencies"/>
         <conf name="format" description="Code formatting dependencies"/>
+        <conf name="spotbugs" description="SpotBugs dependencies"/>
     </configurations>
     <dependencies>
         <!-- JUnit 5 -->
@@ -29,5 +30,9 @@
 
         <!-- Google Java Format -->
         <dependency org="com.google.googlejavaformat" name="google-java-format" rev="1.17.0" conf="format->default"/>
+
+        <!-- SpotBugs -->
+        <dependency org="com.github.spotbugs" name="spotbugs" rev="4.9.6" conf="spotbugs->default"/>
+        <dependency org="com.github.spotbugs" name="spotbugs-ant" rev="4.9.6" conf="spotbugs->default"/>
     </dependencies>
 </ivy-module>
