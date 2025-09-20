@@ -277,7 +277,7 @@
     </target>
 
     <!-- Add to the check target -->
-    <target name="check" depends="compile, checkstyle-warn, format-check" description="Run all checks"/>
+    <target name="check" depends="compile, checkstyle, format-check" description="Run all checks"/>
 
     <!-- =================================
           Override NetBeans targets

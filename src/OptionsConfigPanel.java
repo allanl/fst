@@ -27,7 +27,9 @@ public class OptionsConfigPanel extends javax.swing.JPanel {
   public static int integerFieldHandler(int minimum, JTextComponent com, int current) {
     try {
       int temp = Integer.parseInt(com.getText());
-      if (temp < minimum) throw new NumberFormatException();
+      if (temp < minimum) {
+        throw new NumberFormatException();
+      }
       return temp;
     } catch (NumberFormatException ne) {
       com.setText(Integer.toString(current));
@@ -88,10 +90,10 @@ public class OptionsConfigPanel extends javax.swing.JPanel {
     wordOrderCombo = new javax.swing.JComboBox<>();
     jLabel2 = new javax.swing.JLabel();
     letterOrderCombo = new javax.swing.JComboBox<>();
-    FontLabel = new javax.swing.JLabel();
-    OrderLabel = new javax.swing.JLabel();
-    DisplayLabel = new javax.swing.JLabel();
-    PositionLabel = new javax.swing.JLabel();
+    fontLabel = new javax.swing.JLabel();
+    orderLabel = new javax.swing.JLabel();
+    displayLabel = new javax.swing.JLabel();
+    positionLabel = new javax.swing.JLabel();
     jPanel1 = new javax.swing.JPanel();
     sizeField = new javax.swing.JTextField();
     jLabel10 = new javax.swing.JLabel();
@@ -268,37 +270,37 @@ public class OptionsConfigPanel extends javax.swing.JPanel {
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     jPanel2.add(letterOrderCombo, gridBagConstraints);
 
-    FontLabel.setFont(new java.awt.Font("SansSerif", 1, 13));
-    FontLabel.setText("Font");
+    fontLabel.setFont(new java.awt.Font("SansSerif", 1, 13));
+    fontLabel.setText("Font");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    jPanel2.add(FontLabel, gridBagConstraints);
+    jPanel2.add(fontLabel, gridBagConstraints);
 
-    OrderLabel.setFont(new java.awt.Font("SansSerif", 1, 13));
-    OrderLabel.setText("Order");
+    orderLabel.setFont(new java.awt.Font("SansSerif", 1, 13));
+    orderLabel.setText("Order");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    jPanel2.add(OrderLabel, gridBagConstraints);
+    jPanel2.add(orderLabel, gridBagConstraints);
 
-    DisplayLabel.setFont(new java.awt.Font("SansSerif", 1, 13));
-    DisplayLabel.setText("Timing");
+    displayLabel.setFont(new java.awt.Font("SansSerif", 1, 13));
+    displayLabel.setText("Timing");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    jPanel2.add(DisplayLabel, gridBagConstraints);
+    jPanel2.add(displayLabel, gridBagConstraints);
 
-    PositionLabel.setFont(new java.awt.Font("SansSerif", 1, 13));
-    PositionLabel.setText("Position");
+    positionLabel.setFont(new java.awt.Font("SansSerif", 1, 13));
+    positionLabel.setText("Position");
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    jPanel2.add(PositionLabel, gridBagConstraints);
+    jPanel2.add(positionLabel, gridBagConstraints);
 
     jPanel1.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 0, 0));
 
@@ -719,10 +721,10 @@ public class OptionsConfigPanel extends javax.swing.JPanel {
   } // GEN-LAST:event_alphaSliderMouseReleased
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JLabel DisplayLabel;
-  private javax.swing.JLabel FontLabel;
-  private javax.swing.JLabel OrderLabel;
-  private javax.swing.JLabel PositionLabel;
+  private javax.swing.JLabel displayLabel;
+  private javax.swing.JLabel fontLabel;
+  private javax.swing.JLabel orderLabel;
+  private javax.swing.JLabel positionLabel;
   private javax.swing.JLabel alphaLabel;
   private javax.swing.JSlider alphaSlider;
   private javax.swing.JButton colorButton;

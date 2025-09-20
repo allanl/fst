@@ -14,7 +14,7 @@ import javax.swing.JPanel;
  * @author krolaw
  */
 public class SamplePanel extends JPanel {
-  BufferedImage grid;
+  private BufferedImage grid;
 
   public SamplePanel() {
     setPreferredSize(new Dimension(80, 80));

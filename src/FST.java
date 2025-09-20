@@ -52,9 +52,12 @@ public class FST extends JFrame {
   static List<String> messages = new ArrayList<>();
   static Font font = new Font("sans-serif", Font.PLAIN, 35);
   static Color fontColour = new Color(0, 0, 255, 30);
-  static int display = 100, delay = 300;
-  static int placementX = RANDOM, placementY = RANDOM;
-  static int marginX = 40, marginY = 40;
+  static int display = 100;
+  static int delay = 300;
+  static int placementX = RANDOM;
+  static int placementY = RANDOM;
+  static int marginX = 40;
+  static int marginY = 40;
   static int letterOrder = FORWARD;
   static int messageOrder = RANDOM;
   static int wordOrder = FORWARD;
@@ -68,17 +71,16 @@ public class FST extends JFrame {
   private int height = 0;
   private int messagePosition = -1;
   private Dimension screen = null;
-
   private int ascent = 0;
   private int x = 0;
 
-  static final File saveDir =
+  static final File SAVE_DIR =
       new File(
           System.getProperty("os.name").toUpperCase().contains("WIN")
               ? System.getenv("APPDATA")
               : System.getProperty("user.home"));
 
-  static final File configFile = new File(saveDir, "FSTConfig.xml");
+  static final File CONFIG_FILE = new File(SAVE_DIR, "FSTConfig.xml");
   private static Config config;
 
   public static void main(String[] args) {
@@ -169,6 +171,9 @@ public class FST extends JFrame {
             Collections.shuffle(msg.subList(1, msg.size() - 1));
           }
           break;
+        default:
+          // FORWARD and JOIN modes - no reordering needed
+          break;
       }
     }
   }
@@ -177,7 +182,9 @@ public class FST extends JFrame {
   private static Transformer transformer = null;
 
   public static void save() {
-    if (configChanged && canSave) configChanged = false;
+    if (configChanged && canSave) {
+      configChanged = false;
+    }
     try {
       if (documentBuilder == null) {
         documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -231,7 +238,7 @@ public class FST extends JFrame {
         top.appendChild(messageNode);
       }
 
-      transformer.transform(new DOMSource(top), new StreamResult(configFile));
+      transformer.transform(new DOMSource(top), new StreamResult(CONFIG_FILE));
 
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(null, "Error: Saving FSTConfig.xml - " + ex);
@@ -241,7 +248,7 @@ public class FST extends JFrame {
   private static void parseConfigFile() {
     try { // Parse xml file
       DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      Document doc = db.parse(configFile);
+      Document doc = db.parse(CONFIG_FILE);
       try { // Check Data
         NodeList nl = doc.getElementsByTagName("message");
         messages = new ArrayList<>(nl.getLength());
@@ -323,7 +330,9 @@ public class FST extends JFrame {
       JOptionPane.showMessageDialog(
           null, "Error: FSTConfig.xml could not be parsed.  A new config file will be created.");
     }
-    if (messages.isEmpty()) messages.add("Test Message");
+    if (messages.isEmpty()) {
+      messages.add("Test Message");
+    }
   }
 
   public static int getInt(String value, int def) {
@@ -395,9 +404,11 @@ public class FST extends JFrame {
   public void paint(Graphics g) {
     g.clearRect(0, 0, this.getWidth(), this.getHeight());
 
-    g.setFont(font);
-    g.setColor(fontColour);
-    g.drawString(text, x, ascent);
+    if (text != null) {
+      g.setFont(font);
+      g.setColor(fontColour);
+      g.drawString(text, x, ascent);
+    }
   }
 
   int getPosition(int length, int width, int mode, int margin) {
@@ -438,12 +449,14 @@ public class FST extends JFrame {
       }
 
       if (messages.size() > 0) {
-        text =
-            orderMessage(
-                messages.get(
-                    messageOrder == RANDOM
-                        ? (int) (Math.random() * messages.size())
-                        : (messagePosition = (messagePosition + 1) % messages.size())));
+        int messageIndex;
+        if (messageOrder == RANDOM) {
+          messageIndex = (int) (Math.random() * messages.size());
+        } else {
+          messagePosition = (messagePosition + 1) % messages.size();
+          messageIndex = messagePosition;
+        }
+        text = orderMessage(messages.get(messageIndex));
         int width = fontMetrics.stringWidth(text);
         x = getPosition(screen.width, width, placementX, marginX);
         int y = getPosition(screen.height, height, placementY, marginY);

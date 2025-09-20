@@ -29,7 +29,9 @@ public class Config extends javax.swing.JFrame implements Runnable {
               .replaceAll("\\#VERSION\\#", FST.VERSION));
     } catch (IOException ex) {
     }
-    if (FST.configWindow == 2) setExtendedState(ICONIFIED);
+    if (FST.configWindow == 2) {
+      setExtendedState(ICONIFIED);
+    }
     setVisible(true);
     FST.canSave = true;
     if (System.currentTimeMillis() / 1000L > FST.nextUpdate) {
@@ -103,6 +105,9 @@ public class Config extends javax.swing.JFrame implements Runnable {
         System.exit(0);
       case 1:
         FST.minimise();
+        break;
+      default:
+        // Cancel option - do nothing
     }
   } // GEN-LAST:event_formWindowClosing
 
