@@ -23,7 +23,7 @@
         <dependency org="org.mockito" name="mockito-junit-jupiter" rev="5.3.1" />
 
         <!-- JaCoCo -->
-        <dependency org="org.jacoco" name="org.jacoco.ant" rev="0.8.8" />
+        <dependency org="org.jacoco" name="org.jacoco.ant" rev="0.8.13" />
 
         <!-- Checkstyle -->
         <dependency org="com.puppycrawl.tools" name="checkstyle" rev="10.12.5" conf="checkstyle->default"/>
