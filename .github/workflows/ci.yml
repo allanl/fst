@@ -1,0 +1,226 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  JAVA_DISTRIBUTION: 'temurin'
+
+jobs:
+  # Fast fail checks - run first, fail fast
+  fast-checks:
+    name: Fast Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4.1.7
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4.2.1
+        with:
+          java-version: '17'
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+
+      - name: Cache Ivy Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.ivy2/cache
+          key: ivy-${{ hashFiles('ivy.xml') }}
+          restore-keys: ivy-
+
+      - name: Fast Checks (Ant Target)
+        run: ant resolve format-check checkstyle
+
+  # Build and test matrix - runs after fast checks pass
+  build-test:
+    name: Build & Test (Java ${{ matrix.java }})
+    runs-on: ubuntu-latest
+    needs: fast-checks
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [8, 11, 17, 21]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4.1.7
+
+      - name: Setup Java ${{ matrix.java }}
+        uses: actions/setup-java@v4.2.1
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+
+      - name: Cache Ivy Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.ivy2/cache
+          key: ivy-${{ hashFiles('ivy.xml') }}
+          restore-keys: ivy-
+
+      - name: CI Pipeline (Ant Target)
+        run: ant ci-pipeline
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-java${{ matrix.java }}
+          path: build/test/results/
+          retention-days: 90
+
+      - name: Upload Coverage Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports-java${{ matrix.java }}
+          path: reports/coverage/
+          retention-days: 90
+
+      - name: Upload Quality Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-reports-java${{ matrix.java }}
+          path: reports/
+          retention-days: 90
+
+  # Build artifacts - only after all tests pass
+  artifacts:
+    name: Build Artifacts (Java ${{ matrix.java }})
+    runs-on: ubuntu-latest
+    needs: build-test
+    if: github.ref == 'refs/heads/master'
+    timeout-minutes: 10
+
+    strategy:
+      matrix:
+        java: [8, 11, 17, 21]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4.1.7
+
+      - name: Setup Java ${{ matrix.java }}
+        uses: actions/setup-java@v4.2.1
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+
+      - name: Cache Ivy Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.ivy2/cache
+          key: ivy-${{ hashFiles('ivy.xml') }}
+          restore-keys: ivy-
+
+      - name: Build Release JAR (Ant Target)
+        run: ant clean build
+
+      - name: Upload Java ${{ matrix.java }} JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: fst-java${{ matrix.java }}-latest
+          path: dist/FST.jar
+          retention-days: 90
+
+  # Validate CI/Local Parity
+  validate-parity:
+    name: Validate CI/Local Parity
+    runs-on: ubuntu-latest
+    needs: build-test
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4.1.7
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4.2.1
+        with:
+          java-version: '17'
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+
+      - name: Cache Ivy Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.ivy2/cache
+          key: ivy-${{ hashFiles('ivy.xml') }}
+          restore-keys: ivy-
+
+      - name: Validate Parity (Ant Target)
+        run: ant validate-ci-parity
+
+  # Summary comment for PRs
+  pr-summary:
+    name: PR Summary
+    runs-on: ubuntu-latest
+    needs: [fast-checks, build-test, validate-parity]
+    if: github.event_name == 'pull_request' && always()
+
+    steps:
+      - name: Generate PR Summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: jobs } = await github.rest.actions.listJobsForWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.runId
+            });
+
+            let summary = '## 🚀 CI/CD Results\n\n';
+            summary += '| Check | Status |\n';
+            summary += '|-------|--------|\n';
+
+            // Fast checks
+            const fastCheck = jobs.jobs.find(job => job.name === 'Fast Checks');
+            if (fastCheck) {
+              const status = fastCheck.conclusion === 'success' ? '✅' : '❌';
+              summary += `| Fast Checks (Format & Style) | ${status} |\n`;
+            }
+
+            // Build tests
+            const buildJobs = jobs.jobs.filter(job => job.name.includes('Build & Test'));
+            buildJobs.forEach(job => {
+              const javaVersion = job.name.match(/Java (\d+)/)?.[1] || 'Unknown';
+              const status = job.conclusion === 'success' ? '✅' : '❌';
+              summary += `| Build & Test (Java ${javaVersion}) | ${status} |\n`;
+            });
+
+            // Parity check
+            const parityCheck = jobs.jobs.find(job => job.name === 'Validate CI/Local Parity');
+            if (parityCheck) {
+              const status = parityCheck.conclusion === 'success' ? '✅' : '❌';
+              summary += `| CI/Local Parity | ${status} |\n`;
+            }
+
+            summary += '\n### 📊 Reports\n';
+            summary += 'Detailed reports are available in the **Actions** tab:\n';
+            summary += '- Test results and coverage reports\n';
+            summary += '- Code quality analysis (Checkstyle, SpotBugs)\n';
+            summary += '- Multi-Java compatibility results\n\n';
+
+            summary += '### 🔧 Local Development\n';
+            summary += 'Run the same checks locally:\n';
+            summary += '```bash\n';
+            summary += '# Fast checks\n';
+            summary += 'ant format-check checkstyle\n\n';
+            summary += '# Complete CI pipeline\n';
+            summary += 'ant ci-pipeline\n\n';
+            summary += '# Validate local/CI parity\n';
+            summary += 'ant validate-ci-parity\n';
+            summary += '```\n';
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
