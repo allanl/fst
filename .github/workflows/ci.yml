@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, test-ci-workflow ]
   pull_request:
     branches: [ master ]
 
@@ -66,7 +66,7 @@ jobs:
           restore-keys: ivy-
 
       - name: CI Pipeline (Ant Target)
-        run: ant ci-pipeline
+        run: xvfb-run -a ant ci-pipeline
 
       - name: Upload Test Results
         if: always()
@@ -155,7 +155,7 @@ jobs:
           restore-keys: ivy-
 
       - name: Validate Parity (Ant Target)
-        run: ant validate-ci-parity
+        run: xvfb-run -a ant validate-ci-parity
 
   # Summary comment for PRs
   pr-summary:
