@@ -17,10 +17,10 @@ Free Subliminal Text (FST), flashes subliminal messages on screen. The default s
 * Text Control - Have each message's words or letters reversed or randomized.
 * Placement Control - Left-Top to Right-Bottom, plus random and margin options.
 * Message Control - Drag and drop suggestions are available, but any message inside Your Messages can be edited.
-* Multiplatform - Windows at work, Mac and/or Linux (think Asus EEE) at home? No problem. FST runs on any platform Java (JRE 1.8+) does.
+* Multiplatform - Windows at work, Mac and/or Linux (think Asus EEE) at home? No problem. FST runs on any platform Java (JRE 11+) does.
 
 ## Requirements
-* Java 1.8+ must be installed.
+* Java 11+ must be installed.
 
 ## Setup
 The application FST.jar can be put anywhere. Bear in mind that it will try to create a config file called FSTConfig.xml in the same location.
@@ -51,7 +51,7 @@ If FST.jar opens in archive manager instead of executing, right-click and select
 
 ## Release History
 ### 1.51 - 2025-07-27
-* Updated to require Java 1.8.
+* Updated to require Java 11.
 
 ### 1.50 - 2014-03-01
 * Switched to native transparency.
@@ -98,7 +98,7 @@ This section provides information for developers who want to build, test, and co
 ### Development Setup
 
 #### Required Software
-- JDK 8 or higher
+- JDK 11 or higher
 - Apache Ant 1.9 or higher
 - Git (optional, for version control)
 
@@ -344,7 +344,7 @@ The CI/CD pipeline consists of three main phases:
    - Fails fast to provide immediate feedback
 
 2. **Build & Test Matrix** (15 minutes per Java version)
-   - Tests on Java 8, 11, 17, and 21
+   - Tests on Java 11, 17, and 21
    - Complete CI pipeline: `ant ci-pipeline`
    - Coverage analysis and quality reports
 
@@ -375,8 +375,7 @@ The project supports multiple Java versions:
 
 | Java Version | Purpose | Artifact |
 |--------------|---------|----------|
-| Java 8 | Legacy Support | `fst-java8-latest.jar` |
-| Java 11 | LTS Support | `fst-java11-latest.jar` |
+| Java 11 | **Minimum Required** | `fst-java11-latest.jar` |
 | Java 17 | **Primary Target** | `fst-java17-latest.jar` |
 | Java 21 | Future Compatibility | `fst-java21-latest.jar` |
 
