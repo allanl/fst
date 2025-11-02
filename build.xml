@@ -60,7 +60,7 @@
          ================================= -->
     <target name="resolve" depends="init-ivy" description="Retrieve dependencies with Ivy">
         <echo message="=== Starting Ivy resolution ==="/>
-        <ivy:retrieve pattern="${basedir}/lib/[conf]/[artifact]-[revision](-[classifier]).[ext]" sync="true"/>
+        <ivy:retrieve pattern="${basedir}/lib/[conf]/[artifact]-[revision](-[classifier]).[ext]"/>
         <ivy:cachepath pathid="ivy.compile.classpath" conf="default"/>
         <ivy:cachepath pathid="ivy.test.classpath" conf="default"/>
 
@@ -362,7 +362,7 @@
         <build-status target="dev" status="COMPLETED"/>
     </target>
 
-    <target name="pre-commit" depends="format, dev-check" description="Pre-commit validation (format + quick checks)">
+    <target name="pre-commit" depends="resolve, format, dev-check" description="Pre-commit validation (format + quick checks)">
         <build-status target="pre-commit" status="COMPLETED"/>
     </target>
 
