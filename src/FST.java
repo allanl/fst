@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Random;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -30,6 +31,20 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class FST extends JFrame {
+  public static class MessageState {
+    final String text;
+    final int x;
+    final Font font;
+    final Color color;
+
+    public MessageState(String text, int x, Font font, Color color) {
+      this.text = text;
+      this.x = x;
+      this.font = font;
+      this.color = color;
+    }
+  }
+
   private static boolean configChanged = false;
   static boolean canSave = false;
   private static Timer displayTimer;
@@ -66,7 +81,6 @@ public class FST extends JFrame {
   static long nextUpdate = System.currentTimeMillis() / 1000L + 30L * 86400L;
   static boolean checkUpdates = true;
   private static final Random IRANDOM = new Random();
-  private String text;
   private FontMetrics fontMetrics;
   private Toolkit toolkit;
   private Font tempFont = null;
@@ -74,7 +88,7 @@ public class FST extends JFrame {
   private int messagePosition = -1;
   private Dimension screen = null;
   private int ascent = 0;
-  private int x = 0;
+  private volatile MessageState currentState = null;
 
   static final File SAVE_DIR =
       new File(
@@ -372,8 +386,15 @@ public class FST extends JFrame {
         new Timer(
             display,
             e -> {
-              setVisible(false);
-              delayTimer.restart();
+              // Clear state and repaint before hiding to prevent stale cached content
+              // from appearing when window becomes visible again
+              currentState = null;
+              repaint();
+              SwingUtilities.invokeLater(
+                  () -> {
+                    setVisible(false);
+                    delayTimer.restart();
+                  });
             });
     displayTimer.setRepeats(false);
 
@@ -406,10 +427,11 @@ public class FST extends JFrame {
   public void paint(Graphics g) {
     g.clearRect(0, 0, this.getWidth(), this.getHeight());
 
-    if (text != null) {
-      g.setFont(font);
-      g.setColor(fontColour);
-      g.drawString(text, x, ascent);
+    MessageState state = currentState;
+    if (state != null) {
+      g.setFont(state.font);
+      g.setColor(state.color);
+      g.drawString(state.text, state.x, ascent);
     }
   }
 
@@ -458,10 +480,11 @@ public class FST extends JFrame {
           messagePosition = (messagePosition + 1) % messages.size();
           messageIndex = messagePosition;
         }
-        text = orderMessage(messages.get(messageIndex));
+        String text = orderMessage(messages.get(messageIndex));
         int width = fontMetrics.stringWidth(text);
-        x = getPosition(screen.width, width, placementX, marginX);
+        int x = getPosition(screen.width, width, placementX, marginX);
         int y = getPosition(screen.height, height, placementY, marginY);
+        currentState = new MessageState(text, x, font, fontColour);
         setLocation(0, y);
 
         setVisible(true);

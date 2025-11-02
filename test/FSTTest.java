@@ -1,3 +1,5 @@
+import java.awt.Color;
+import java.awt.Font;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -41,5 +43,21 @@ public class FSTTest {
         assertThat(FST.fontColour).isNotNull();
         assertThat(FST.fontColour.getAlpha()).isEqualTo(30);
         assertThat(FST.fontColour.getBlue()).isEqualTo(255);
+    }
+
+    @Test
+    @DisplayName("MessageState is immutable")
+    public void testMessageStateImmutability() {
+        String text = "Test Message";
+        int x = 100;
+        Font font = new Font("Arial", Font.BOLD, 20);
+        Color color = new Color(255, 0, 0, 128);
+
+        FST.MessageState state = new FST.MessageState(text, x, font, color);
+
+        assertThat(state.text).isEqualTo(text);
+        assertThat(state.x).isEqualTo(x);
+        assertThat(state.font).isSameAs(font);
+        assertThat(state.color).isSameAs(color);
     }
 }
