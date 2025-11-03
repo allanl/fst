@@ -40,7 +40,8 @@ public class OptionsConfigPanel extends javax.swing.JPanel {
   /** Creates new form FontConfigPanel */
   public OptionsConfigPanel() {
     initComponents();
-    sampleText = FST.orderMessage(SAMPLE_TEXT);
+    sampleText =
+        MessageSelector.orderMessage(SAMPLE_TEXT, FST.getWordOrder(), FST.getLetterOrder());
 
     sizeField.addKeyListener(DIGITS_ONLY);
     GraphicsEnvironment gEnv = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -64,8 +65,8 @@ public class OptionsConfigPanel extends javax.swing.JPanel {
     placementX.setSelectedIndex(FST.placementX);
     placementY.setSelectedIndex(FST.placementY);
     styleCombo.setSelectedIndex(FST.font.getStyle());
-    wordOrderCombo.setSelectedIndex(FST.wordOrder);
-    letterOrderCombo.setSelectedIndex(FST.letterOrder);
+    wordOrderCombo.setSelectedIndex(FST.getWordOrder());
+    letterOrderCombo.setSelectedIndex(FST.getLetterOrder());
     updatesCheckBox.setSelected(FST.checkUpdates);
     minimizeCheckBox.setSelected(FST.configWindow == 2);
   }
@@ -683,16 +684,18 @@ public class OptionsConfigPanel extends javax.swing.JPanel {
 
   private void wordOrderComboActionPerformed(
       java.awt.event.ActionEvent evt) { // GEN-FIRST:event_wordOrderComboActionPerformed
-    FST.wordOrder = wordOrderCombo.getSelectedIndex();
-    sampleText = FST.orderMessage(SAMPLE_TEXT);
+    FST.setWordOrder(wordOrderCombo.getSelectedIndex());
+    sampleText =
+        MessageSelector.orderMessage(SAMPLE_TEXT, FST.getWordOrder(), FST.getLetterOrder());
     samplePanel1.repaint();
     FST.settingsChanged();
   } // GEN-LAST:event_wordOrderComboActionPerformed
 
   private void letterOrderComboActionPerformed(
       java.awt.event.ActionEvent evt) { // GEN-FIRST:event_letterOrderComboActionPerformed
-    FST.letterOrder = letterOrderCombo.getSelectedIndex();
-    sampleText = FST.orderMessage(SAMPLE_TEXT);
+    FST.setLetterOrder(letterOrderCombo.getSelectedIndex());
+    sampleText =
+        MessageSelector.orderMessage(SAMPLE_TEXT, FST.getWordOrder(), FST.getLetterOrder());
     samplePanel1.repaint();
     FST.settingsChanged();
   } // GEN-LAST:event_letterOrderComboActionPerformed

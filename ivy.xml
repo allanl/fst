@@ -22,6 +22,9 @@
         <dependency org="org.mockito" name="mockito-core" rev="5.3.1" />
         <dependency org="org.mockito" name="mockito-junit-jupiter" rev="5.3.1" />
 
+        <!-- jqwik for property-based testing -->
+        <dependency org="net.jqwik" name="jqwik" rev="1.8.2" />
+
         <!-- JaCoCo -->
         <dependency org="org.jacoco" name="org.jacoco.ant" rev="0.8.13" />
 

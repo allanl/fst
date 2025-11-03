@@ -7,10 +7,6 @@ import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import javax.swing.JFrame;
@@ -54,18 +50,19 @@ public class FST extends JFrame {
   static final int LEFT = 1;
   static final int CENTER = 2;
   static final int RIGHT = 3;
-  static final int FORWARD = 0;
-  static final int REVERSE = 1;
-  static final int RND_INNER = 2;
-  static final int RND = 3;
-  static final int JOIN = 4;
+  // Word/Letter ordering - use MessageSelector constants
+  static final int FORWARD = MessageSelector.FORWARD;
+  static final int REVERSE = MessageSelector.REVERSE;
+  static final int RND_INNER = MessageSelector.RND_INNER;
+  static final int RND = MessageSelector.RND;
+  static final int JOIN = MessageSelector.JOIN;
   static final String[] ORDER_STRINGS = {"forward", "reverse", "rndinner", "random", "join"};
   static final String[] FONT_STYLES_STRINGS = {"plain", "bold", "italic", "bolditalic"};
   static final String[] H_ALIGN_STRINGS = {"random", "left", "center", "right"};
   static final String[] V_ALIGN_STRINGS = {"random", "top", "center", "bottom"};
   static final String[] CONFIG_WINDOW_STRINGS = {"false", "true", "minimized"};
   static final String[] MESSAGE_ORDER_STRINGS = {"random", "sequential"};
-  static List<String> messages = new ArrayList<>();
+  static List<String> messages = new ArrayList<>(); // Shared reference with MessageSelector
   static Font font = new Font("sans-serif", Font.PLAIN, 35);
   static Color fontColour = new Color(0, 0, 255, 30);
   static int display = 100;
@@ -74,9 +71,11 @@ public class FST extends JFrame {
   static int placementY = RANDOM;
   static int marginX = 40;
   static int marginY = 40;
-  static int letterOrder = FORWARD;
-  static int messageOrder = RANDOM;
-  static int wordOrder = FORWARD;
+  private static MessageSelector messageSelector;
+  // Message ordering config (synced to MessageSelector via setters)
+  private static int letterOrder = FORWARD;
+  private static int messageOrder = RANDOM;
+  private static int wordOrder = FORWARD;
   static int configWindow = 1;
   static long nextUpdate = System.currentTimeMillis() / 1000L + 30L * 86400L;
   static boolean checkUpdates = true;
@@ -85,7 +84,6 @@ public class FST extends JFrame {
   private Toolkit toolkit;
   private Font tempFont = null;
   private int height = 0;
-  private int messagePosition = -1;
   private Dimension screen = null;
   private int ascent = 0;
   private volatile MessageState currentState = null;
@@ -112,6 +110,49 @@ public class FST extends JFrame {
     updateTimerDurations();
   }
 
+  // Message ordering configuration accessors
+  // FST holds config state (loaded before MessageSelector exists, saved to XML)
+  // Setters sync to MessageSelector for runtime behavior
+  public static void setMessages(List<String> newMessages) {
+    messages = newMessages;
+    if (messageSelector != null) {
+      messageSelector.setMessages(newMessages);
+    }
+  }
+
+  public static int getWordOrder() {
+    return wordOrder;
+  }
+
+  public static void setWordOrder(int value) {
+    wordOrder = value;
+    if (messageSelector != null) {
+      messageSelector.setWordOrder(value);
+    }
+  }
+
+  public static int getLetterOrder() {
+    return letterOrder;
+  }
+
+  public static void setLetterOrder(int value) {
+    letterOrder = value;
+    if (messageSelector != null) {
+      messageSelector.setLetterOrder(value);
+    }
+  }
+
+  public static int getMessageOrder() {
+    return messageOrder;
+  }
+
+  public static void setMessageOrder(int value) {
+    messageOrder = value;
+    if (messageSelector != null) {
+      messageSelector.setMessageOrder(value);
+    }
+  }
+
   public static void updateTimerDurations() {
     if (displayTimer != null) {
       displayTimer.setInitialDelay(display);
@@ -132,66 +173,6 @@ public class FST extends JFrame {
       }
     }
     return def;
-  }
-
-  public static String join(Collection s, String delimiter) {
-    StringBuilder buffer = new StringBuilder();
-    Iterator iter = s.iterator();
-    if (iter.hasNext()) {
-      buffer.append(iter.next());
-      while (iter.hasNext()) {
-        buffer.append(delimiter);
-        buffer.append(iter.next());
-      }
-    }
-    return buffer.toString();
-  }
-
-  protected static String orderMessage(String msg) {
-    if (wordOrder == FORWARD && letterOrder == FORWARD) {
-      return msg;
-    }
-    List<String> words;
-    if (wordOrder == JOIN) {
-      words = new ArrayList<>(1);
-      words.add(msg);
-    } else {
-      words = Arrays.asList(msg.split(" "));
-    }
-    orderList(words, wordOrder);
-    if (letterOrder != FORWARD) {
-      for (int x = 0; x < words.size(); x++) {
-        char[] l = words.get(x).toCharArray();
-        List<Character> letters = new ArrayList<>(l.length);
-        for (Character c : l) {
-          letters.add(c);
-        }
-        orderList(letters, letterOrder);
-        words.set(x, join(letters, ""));
-      }
-    }
-    return join(words, " ");
-  }
-
-  private static void orderList(List msg, int mode) {
-    if (msg.size() > 1) {
-      switch (mode) {
-        case REVERSE:
-          Collections.reverse(msg);
-          break;
-        case RND:
-          Collections.shuffle(msg);
-          break;
-        case RND_INNER:
-          if (msg.size() > 3) {
-            Collections.shuffle(msg.subList(1, msg.size() - 1));
-          }
-          break;
-        default:
-          // FORWARD and JOIN modes - no reordering needed
-          break;
-      }
-    }
   }
 
   private static DocumentBuilder documentBuilder = null;
@@ -267,10 +248,11 @@ public class FST extends JFrame {
       Document doc = db.parse(CONFIG_FILE);
       try { // Check Data
         NodeList nl = doc.getElementsByTagName("message");
-        messages = new ArrayList<>(nl.getLength());
+        List<String> loadedMessages = new ArrayList<>(nl.getLength());
         for (int x = 0; x < nl.getLength(); x++) {
-          messages.add(nl.item(x).getTextContent());
+          loadedMessages.add(nl.item(x).getTextContent());
         }
+        setMessages(loadedMessages);
         Element topElement = (Element) doc.getElementsByTagName("fst").item(0);
 
         if (!(topElement.getAttribute("author").equals("http://richard.warburton.it"))) {
@@ -381,6 +363,9 @@ public class FST extends JFrame {
     toolkit = Toolkit.getDefaultToolkit();
     setBackground(new Color(0f, 0f, 0f, 0f));
 
+    // Initialize message selector
+    messageSelector = new MessageSelector(messages, messageOrder, wordOrder, letterOrder);
+
     // Initialize timers
     displayTimer =
         new Timer(
@@ -472,15 +457,8 @@ public class FST extends JFrame {
         setBounds(0, 0, screen.width, height);
       }
 
-      if (messages.size() > 0) {
-        int messageIndex;
-        if (messageOrder == RANDOM) {
-          messageIndex = (int) (Math.random() * messages.size());
-        } else {
-          messagePosition = (messagePosition + 1) % messages.size();
-          messageIndex = messagePosition;
-        }
-        String text = orderMessage(messages.get(messageIndex));
+      String text = messageSelector.getNextMessage();
+      if (text != null) {
         int width = fontMetrics.stringWidth(text);
         int x = getPosition(screen.width, width, placementX, marginX);
         int y = getPosition(screen.height, height, placementY, marginY);

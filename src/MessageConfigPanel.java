@@ -37,7 +37,7 @@ public class MessageConfigPanel extends javax.swing.JPanel {
 
     initComponents();
 
-    messageOrderBox.setSelectedIndex(FST.messageOrder);
+    messageOrderBox.setSelectedIndex(FST.getMessageOrder());
 
     StringBuilder sb = new StringBuilder();
     for (String msg : FST.messages) {
@@ -225,7 +225,7 @@ public class MessageConfigPanel extends javax.swing.JPanel {
 
   private void messageOrderBoxActionPerformed(
       java.awt.event.ActionEvent evt) { // GEN-FIRST:event_messageOrderBoxActionPerformed
-    FST.messageOrder = messageOrderBox.getSelectedIndex();
+    FST.setMessageOrder(messageOrderBox.getSelectedIndex());
     FST.settingsChanged();
   } // GEN-LAST:event_messageOrderBoxActionPerformed
 
