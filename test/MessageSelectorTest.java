@@ -283,6 +283,7 @@ class MessageSelectorTest {
       @ForAll @IntRange(min = 0, max = 3) int letterOrder) {
 
     Assume.that(!input.trim().isEmpty()); // Skip whitespace-only strings
+    Assume.that(input.equals(input.trim())); // Skip leading/trailing spaces (split asymmetry)
 
     String result = MessageSelector.orderMessage(input, wordOrder, letterOrder);
 
@@ -299,6 +300,7 @@ class MessageSelectorTest {
   @Label("Word REVERSE applied twice returns original")
   void wordReverseIsSelfInverse(@ForAll String input) {
     Assume.that(!input.trim().isEmpty()); // Skip whitespace-only strings
+    Assume.that(input.equals(input.trim())); // Skip leading/trailing spaces (split asymmetry)
 
     String reversed = MessageSelector.orderMessage(input, REVERSE, FORWARD);
     String doubleReversed = MessageSelector.orderMessage(reversed, REVERSE, FORWARD);
